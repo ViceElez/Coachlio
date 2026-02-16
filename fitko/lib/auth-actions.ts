@@ -2,22 +2,29 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/server";
+import { loginSchema, signupSchema } from "@/lib/validators/userAuthValidation";
 
 export async function login(formData: FormData) {
-    const supabase =await createClient();
+    const supabase = await createClient();
 
-    // type-casting here for convenience
-    // in practice, you should validate your inputs
     const data = {
-        email: formData.get("email") as string,
+        email: (formData.get("email") as string).trim(),
         password: formData.get("password") as string,
     };
 
-    const { error } = await supabase.auth.signInWithPassword(data);
+    const parsedData = loginSchema.safeParse(data);
+
+    if (!parsedData.success) {
+        const errors = parsedData.error.issues;
+        console.log("Login validation errors:", errors);
+        redirect("/error");
+    }
+
+    const { error } = await supabase.auth.signInWithPassword(parsedData.data);
 
     if (error) {
+        console.log("Login error:", error.message);
         redirect("/error");
     }
 
@@ -28,17 +35,30 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
     const supabase = await createClient();
 
-    // type-casting here for convenience
-    // in practice, you should validate your inputs
-    const firstName = formData.get("first-name") as string;
-    const lastName = formData.get("last-name") as string;
-    const data = {
-        email: formData.get("email") as string,
+    const inputData = {
+        firstName: (formData.get("first-name") as string).trim(),
+        lastName: (formData.get("last-name") as string).trim(),
+        email: (formData.get("email") as string).trim(),
         password: formData.get("password") as string,
+    };
+
+    const parsedData = signupSchema.safeParse(inputData);
+
+    if (!parsedData.success) {
+        const errors = parsedData.error.issues;
+        console.log("Signup validation errors:", errors);
+        redirect("/error");
+    }
+
+    const { firstName, lastName, email, password } = parsedData.data;
+
+    const data = {
+        email,
+        password,
         options: {
             data: {
                 full_name: `${firstName + " " + lastName}`,
-                email: formData.get("email") as string,
+                email,
             },
         },
     };
@@ -46,6 +66,7 @@ export async function signup(formData: FormData) {
     const { error } = await supabase.auth.signUp(data);
 
     if (error) {
+        console.log("Signup error:", error.message);
         redirect("/error");
     }
 
