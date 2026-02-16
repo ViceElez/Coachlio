@@ -45,33 +45,30 @@ export async function signup(formData: FormData) {
     const parsedData = signupSchema.safeParse(inputData);
 
     if (!parsedData.success) {
-        const errors = parsedData.error.issues;
-        console.log("Signup validation errors:", errors);
-        redirect("/error");
+        const fieldErrors: Record<string, string> = {};
+        parsedData.error.issues.forEach(issue => {
+            const key = String(issue.path[0]);
+            if (key) {
+                fieldErrors[key] = issue.message;
+            }
+        });
+
+        return { errors: fieldErrors };
     }
 
     const { firstName, lastName, email, password } = parsedData.data;
 
-    const data = {
+    const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-            data: {
-                full_name: `${firstName + " " + lastName}`,
-                email,
-            },
-        },
-    };
-
-    const { error } = await supabase.auth.signUp(data);
+        options: { data: { full_name: `${firstName} ${lastName}` } },
+    });
 
     if (error) {
-        console.log("Signup error:", error.message);
-        redirect("/error");
+        return { errors: { general: error.message } };
     }
 
-    revalidatePath("/", "layout");
-    redirect("/");
+    return { success: true };
 }
 
 export async function signout() {

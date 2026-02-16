@@ -1,5 +1,7 @@
-import Link from "next/link";
+"use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -13,6 +15,29 @@ import { Label } from "@/components/ui/label";
 import { signup } from "@/lib/auth-actions";
 
 export function SignUpForm() {
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [successMessage, setSuccessMessage] = useState("");
+
+    async function handleSubmit(formData: FormData) {
+        setErrors({});
+        setSuccessMessage("");
+
+        try {
+            const result = await signup(formData);
+
+            if (result.errors) {
+                setErrors(result.errors);
+            } else if (result.success) {
+                setSuccessMessage(
+                    "Account created successfully! Please check your email to verify your account."
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            setErrors({ general: "An unexpected error occurred. Please try again." });
+        }
+    }
+
     return (
         <Card className="mx-auto max-w-sm">
             <CardHeader>
@@ -22,7 +47,13 @@ export function SignUpForm() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form action="">
+                <form action={handleSubmit}>
+                    {errors.general && (
+                        <p className="text-red-500 text-center mb-2">{errors.general}</p>
+                    )}
+                    {successMessage && (
+                        <p className="text-green-600 text-center mb-2">{successMessage}</p>
+                    )}
                     <div className="grid gap-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
@@ -33,6 +64,9 @@ export function SignUpForm() {
                                     placeholder="Max"
                                     required
                                 />
+                                {errors.firstName && (
+                                    <p className="text-red-500 text-sm">{errors.firstName}</p>
+                                )}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="last-name">Last name</Label>
@@ -42,6 +76,9 @@ export function SignUpForm() {
                                     placeholder="Robinson"
                                     required
                                 />
+                                {errors.lastName && (
+                                    <p className="text-red-500 text-sm">{errors.lastName}</p>
+                                )}
                             </div>
                         </div>
                         <div className="grid gap-2">
@@ -53,12 +90,18 @@ export function SignUpForm() {
                                 placeholder="m@example.com"
                                 required
                             />
+                            {errors.email && (
+                                <p className="text-red-500 text-sm">{errors.email}</p>
+                            )}
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
                             <Input name="password" id="password" type="password" />
+                            {errors.password && (
+                                <p className="text-red-500 text-sm">{errors.password}</p>
+                            )}
                         </div>
-                        <Button formAction={signup} type="submit" className="w-full">
+                        <Button type="submit" className="w-full">
                             Create an account
                         </Button>
                     </div>
