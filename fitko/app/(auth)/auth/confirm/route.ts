@@ -1,5 +1,6 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -22,12 +23,14 @@ export async function GET(request: NextRequest) {
             token_hash,
         })
         if (!error) {
+            const cookieStore = await cookies()
+            cookieStore.delete('validated_invite_code')
+
             redirectTo.searchParams.delete('next')
             return NextResponse.redirect(redirectTo)
         }
     }
 
-    // return the user to an error page with some instructions
     redirectTo.pathname = '/error'
     return NextResponse.redirect(redirectTo)
 }

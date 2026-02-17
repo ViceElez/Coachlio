@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -13,10 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signup } from "@/lib/auth-actions";
+import SignInWithGoogleButton from "./SignInWithGoogleButton";
 
 export function SignUpForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [successMessage, setSuccessMessage] = useState("");
+    const router = useRouter();
 
     async function handleSubmit(formData: FormData) {
         setErrors({});
@@ -27,6 +30,11 @@ export function SignUpForm() {
 
             if (result.errors) {
                 setErrors(result.errors);
+                if (result.errors.general?.includes("Invalid session")) {
+                    setTimeout(() => {
+                        router.push("/invite-code?redirect_to=signup");
+                    }, 2000);
+                }
             } else if (result.success) {
                 setSuccessMessage(
                     "Account created successfully! Please check your email to verify your account."
@@ -104,6 +112,7 @@ export function SignUpForm() {
                         <Button type="submit" className="w-full">
                             Create an account
                         </Button>
+                        <SignInWithGoogleButton />
                     </div>
                 </form>
                 <div className="mt-4 text-center text-sm">

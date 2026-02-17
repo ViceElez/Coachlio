@@ -13,9 +13,10 @@ const SignInWithGoogleButton = () => {
                 signInWithGoogle();
             }}
         >
-            Login with Google
+            Sign up with Google
         </Button>
     );
 };
 
 export default SignInWithGoogleButton;
+
