@@ -1,19 +1,26 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 
+type PublicUser = {
+    first_name: string;
+    last_name: string;
+};
+
 const UserGreetText = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<PublicUser | null>(null);
     const [mounted, setMounted] = useState(false);
     const supabase = createClient();
 
     useEffect(() => {
         const fetchUser = async () => {
-            const {
-                data: { user },
-            } = await supabase.auth.getUser();
-            setUser(user);setMounted(true);
+            const { data } = await supabase
+                .from("users")
+                .select("first_name, last_name")
+                .eq("id", (await supabase.auth.getSession()).data.session?.user.id ?? "")
+                .single();
+            setUser(data);
+            setMounted(true);
         };
         fetchUser();
     }, []);
@@ -29,7 +36,7 @@ const UserGreetText = () => {
         backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30"
             >
                 hello&nbsp;
-                <code className="font-mono font-bold">{user.user_metadata.full_name ?? "user"}!</code>
+                <code className="font-mono font-bold">{`${user.first_name} ${user.last_name}`}!</code>
             </p>
         );
     }
