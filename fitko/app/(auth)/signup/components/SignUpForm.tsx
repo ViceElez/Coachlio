@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signup } from "@/lib/auth-actions";
-import SignInWithGoogleButton from "./SignInWithGoogleButton";
 
 export function SignUpForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -112,7 +111,6 @@ export function SignUpForm() {
                         <Button type="submit" className="w-full">
                             Create an account
                         </Button>
-                        <SignInWithGoogleButton />
                     </div>
                 </form>
                 <div className="mt-4 text-center text-sm">

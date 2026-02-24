@@ -40,20 +40,27 @@ export async function login(formData: FormData) {
     const parsedData = loginSchema.safeParse(data);
 
     if (!parsedData.success) {
-        const errors = parsedData.error.issues;
-        console.log("Login validation errors:", errors);
-        redirect("/error");
+        const fieldErrors: Record<string, string> = {};
+        parsedData.error.issues.forEach(issue => {
+            const key = String(issue.path[0]);
+            if (key) fieldErrors[key] = issue.message;
+        });
+        return { errors: fieldErrors };
     }
 
     const { error } = await supabase.auth.signInWithPassword(parsedData.data);
 
     if (error) {
-        console.log("Login error:", error.message);
-        redirect("/error");
+        const msg =
+            error.message.toLowerCase().includes("invalid login credentials") ||
+            error.message.toLowerCase().includes("invalid credentials")
+                ? "Invalid email or password. Please try again."
+                : error.message;
+        return { errors: { general: msg } };
     }
 
-    revalidatePath("/", "layout");
-    redirect("/");
+    revalidatePath("/home", "layout");
+    redirect("/home");
 }
 
 export async function signup(formData: FormData) {
@@ -132,16 +139,10 @@ export async function signout() {
 export async function signInWithGoogle() {
     const supabase = await createClient();
 
-    const cookieStore = await cookies();
-    const inviteCodeCookie = cookieStore.get("validated_invite_code");
-
-    if (!inviteCodeCookie) {
-        redirect("/invite-code?redirect_to=google-oauth");
-    }
-
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
+            redirectTo : `${process.env.NEXT_PUBLIC_BASE_URL}/home`,
             queryParams: {
                 access_type: "offline",
                 prompt: "consent",
@@ -153,7 +154,6 @@ export async function signInWithGoogle() {
         console.log(error);
         redirect("/error");
     }
-    cookieStore.delete("validated_invite_code");
     redirect(data.url);
 }
 
