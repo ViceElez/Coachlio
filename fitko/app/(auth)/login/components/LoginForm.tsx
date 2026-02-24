@@ -25,8 +25,16 @@ export function LoginForm() {
             if (result?.errors) {
                 setErrors(result.errors);
             }
-        } catch (err) {
-            console.error(err);
+        }catch (err) {
+            if (
+                typeof err === "object" &&
+                err !== null &&
+                "digest" in err &&
+                typeof (err as { digest: string }).digest === "string" &&
+                (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+            ) {
+                throw err;
+            }
             setErrors({ general: "An unexpected error occurred. Please try again." });
         }
     }
