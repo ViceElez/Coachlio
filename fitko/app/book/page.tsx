@@ -1,14 +1,13 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
+import {getProfile} from "@/lib/getProfile";
+import {redirect} from "next/navigation";
+import BookClient from "./BookClient";
 
 export default async function BookPage() {
-    const supabase = await createClient();
+    const profile=await getProfile()
 
-    const {data: { user }} = await supabase.auth.getUser();
+    if(!profile) return redirect("/login")
 
-    if (!user) {
-        redirect("/login");
-    }
-
-    return <div>Book</div>;
+    return <>
+        <BookClient profile={profile}/>
+    </>
 }

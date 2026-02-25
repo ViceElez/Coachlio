@@ -1,19 +1,12 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
 import HomeClient from "./HomeClient";
+import {getProfile} from "@/lib/getProfile";
+import {redirect} from "next/navigation";
 
 export default async function HomePage() {
-    const supabase = await createClient();
-
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect("/login");
-    }
+    const profile=await getProfile()
+    if(!profile) redirect("/login")
 
     return <>
-        <HomeClient userId={user.id} />
+        <HomeClient profile={profile} />
     </>;
 }

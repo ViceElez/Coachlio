@@ -1,20 +1,38 @@
-import {type NextRequest, NextResponse} from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { type NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 
 export async function proxy(request: NextRequest) {
-    return await updateSession(request);
+    const supabaseResponse = NextResponse.next({ request })
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll: () => request.cookies.getAll(),
+                setAll: (cookiesToSet) => {
+                    cookiesToSet.forEach(({ name, value, options }) => {
+                        supabaseResponse.cookies.set(name, value, options)
+                    })
+                },
+            },
+        }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const { pathname } = request.nextUrl
+    if (!user) {
+        return NextResponse.redirect(new URL('/login', request.url))
+    }
+    if (!user.user_metadata.is_activated && !pathname.startsWith('/activate')) {
+        return NextResponse.redirect(new URL('/activate', request.url))
+    }
+
+    return supabaseResponse
 }
 
 export const config = {
     matcher: [
-        "/home/:path*",
-        "/book/:path*",
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * Feel free to modify this pattern to include more paths.
-         */
+        '/home/:path*',
+        '/book/:path*',
     ],
 }
