@@ -1,13 +1,31 @@
-import HomeClient from "./HomeClient";
+import HomeClient from "./DashboardClient";
 import {getProfile} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import {routes} from "@/constants/routes";
 
-export default async function HomePage() {
-    const profile=await getProfile()
-    if(!profile) redirect(routes.LOGIN)
+const MOTIVATIONAL_MESSAGES = [
+    "You're doing great! Keep up the momentum 🔥",
+    "Every rep counts. Stay consistent and trust the process 💪",
+    "Small steps every day lead to big results. You've got this! ⚡",
+    "Your only competition is who you were yesterday. Keep pushing! 🚀",
+    "Showing up is half the battle — and you're already here. Let's go! 🎯",
+    "Progress, not perfection. You're on the right track 🌟",
+    "Champions are made on the days they don't feel like it. Be a champion! 🏆",
+    "One session at a time. You're building something amazing 💥",
+    "Your future self will thank you for the work you put in today 🙌",
+    "Consistency beats intensity every time. Keep going! 🔑",
+];
 
-    return <>
-        <HomeClient profile={profile} />
-    </>;
+function pickMessage() {
+    return MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)];
+}
+
+export default async function DashboardPage() {
+    const profile = await getProfile();
+    if (!profile) redirect(routes.LOGIN);
+
+    const motivationalMessage = pickMessage();
+
+    return <HomeClient profile={profile} motivationalMessage={motivationalMessage}
+    />;
 }
