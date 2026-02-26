@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { verifyInviteCode } from "@/lib/auth-actions";
 import { createClient } from "@/utils/supabase/client";
+import {routes} from "@/constants/routes";
 
 export default function ActivatePage() {
     const [code, setCode] = useState("");
@@ -26,7 +27,7 @@ export default function ActivatePage() {
             .from("users")
             .update({ is_activated: true, trainer_id: res.trainerId })
             .eq("id", user!.id);
-        router.push("/home");
+        router.push(routes.DASHBOARD);
     };
 
     return (

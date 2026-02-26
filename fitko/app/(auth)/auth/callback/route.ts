@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import {routes} from "@/constants/routes";
 
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
@@ -9,5 +10,5 @@ export async function GET(request: Request) {
         await supabase.auth.exchangeCodeForSession(code);
     }
 
-    return NextResponse.redirect(new URL("/home", request.url));
+    return NextResponse.redirect(new URL(routes.DASHBOARD, request.url));
 }

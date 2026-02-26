@@ -1,6 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { routes } from '@/constants/routes'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -31,6 +32,6 @@ export async function GET(request: NextRequest) {
         }
     }
 
-    redirectTo.pathname = '/error'
+    redirectTo.pathname = routes.ERROR
     return NextResponse.redirect(redirectTo)
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import {ClientProfile} from "@/interface/clientProfile";
+import {ClientProfile} from "@/constants/interface/clientProfile";
 
 export default function HomeClient({ profile }: { profile: ClientProfile }) {
 

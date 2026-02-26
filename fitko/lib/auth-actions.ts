@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { loginSchema, signupSchema } from "@/lib/validators/userAuthValidation";
+import { routes } from "@/constants/routes";
 
 const rateLimitStore = new Map<string, { attempts: number; resetTime: number }>();
 
@@ -59,8 +60,8 @@ export async function login(formData: FormData) {
         return { errors: { general: msg } };
     }
 
-    revalidatePath("/home", "layout");
-    redirect("/home");
+    revalidatePath(routes.DASHBOARD, "layout");
+    redirect(routes.DASHBOARD);
 }
 
 export async function signup(formData: FormData) {
@@ -130,10 +131,10 @@ export async function signout() {
     const { error } = await supabase.auth.signOut();
     if (error) {
         console.log(error);
-        redirect("/error");
+        redirect(routes.ERROR);
     }
 
-    redirect("/logout");
+    redirect(routes.LOGOUT);
 }
 
 export async function signInWithGoogle() {
@@ -152,7 +153,7 @@ export async function signInWithGoogle() {
 
     if (error) {
         console.log(error);
-        redirect("/error");
+        redirect(routes.ERROR);
     }
     redirect(data.url);
 }

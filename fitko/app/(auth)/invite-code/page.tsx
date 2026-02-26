@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyInviteCode } from "@/lib/auth-actions";
+import { routes } from "@/constants/routes";
 
 export default function InviteCodePage() {
     const [error, setError] = useState("");
@@ -30,7 +31,7 @@ export default function InviteCodePage() {
             const result = await verifyInviteCode(code);
 
             if (result.success) {
-                router.push("/signup");
+                router.push(routes.SIGNUP);
             } else {
                 setError(result.error || "Invalid invite code. Please try again.");
             }
