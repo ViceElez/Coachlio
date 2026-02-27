@@ -10,6 +10,7 @@ import {
     Video,
     Search,
 } from "lucide-react";
+import {SessionProps} from "@/constants/interface/SessionProps";
 
 const SESSIONS = [
     {
@@ -72,7 +73,7 @@ const SESSIONS = [
 
 const FILTERS = ["All Sessions", "Personal", "Group", "Online", "In-Person"];
 
-export default function BookClient({ profile }: { profile: ClientProfile }) {
+export default function BookClient({ profile, availableSessions }: { profile: ClientProfile, availableSessions: SessionProps[]}) {
     const [activeFilter, setActiveFilter] = useState("All Sessions");
     const [search, setSearch] = useState("");
 

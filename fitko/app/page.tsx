@@ -115,7 +115,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center">
                                 <Dumbbell className="w-5 h-5 md:w-6 md:h-6 text-white" />
                             </div>
-                            <span className="text-lg md:text-xl font-semibold">FitCoach</span>
+                            <span className="text-lg md:text-xl font-semibold">Fittonia</span>
                         </div>
                         <div className="flex items-center gap-2 md:gap-3">
                             <button className="hidden sm:inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
