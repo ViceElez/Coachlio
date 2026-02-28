@@ -9,7 +9,6 @@ export default async function BookPage() {
     if(!profile) return redirect(routes.LOGIN)
 
     const clientSessions=await getClientSessions(profile?.trainer_id)
-    console.log("Client Sessions:", clientSessions)
 
     return <>
         <BookClient profile={profile} availableSessions={clientSessions ?? []} />

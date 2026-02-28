@@ -6,7 +6,7 @@ export async function getClientSessions(trainerId:string) {
 
     const { data: sessions, error } = await supabase
         .from('sessions')
-        .select(`id, capacity_available, price, start_time, end_time,status, trainer:users (first_name,last_name)`)
+        .select(`id, capacity_available, price, start_time, end_time,status,session_type, trainer:users (first_name,last_name)`)
         .eq('trainer_id', trainerId)
         .eq('status', 'scheduled')
         .gt('capacity_available', 0)
@@ -17,5 +17,8 @@ export async function getClientSessions(trainerId:string) {
         return null;
     }
 
-    return sessions;
+    return sessions.map((session) => ({
+        ...session,
+        trainer: Array.isArray(session.trainer) ? session.trainer[0] : session.trainer,
+    }));
 }

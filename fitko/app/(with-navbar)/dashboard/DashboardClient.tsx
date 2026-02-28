@@ -17,27 +17,37 @@ export default function DashboardClient({
 
     const upcomingSessions: SessionProps[] = [
         {
-            coach: "John Smith",
+            id: 1,
+            capacity_available: 5,
+            price: 0,
             status: "confirmed",
             start_time: "2025-07-25T09:00:00",
             end_time: "2025-07-25T10:00:00",
-            current_capacity: 5,
+            session_type: "1on1",
+            trainer: { first_name: "John", last_name: "Smith" },
         },
         {
-            coach: "Sarah Johnson",
+            id: 2,
+            capacity_available: 3,
+            price: 0,
             status: "pending",
             start_time: "2025-07-27T14:00:00",
             end_time: "2025-07-27T15:30:00",
-            current_capacity: 3,
+            session_type: "group",
+            trainer: { first_name: "Sarah", last_name: "Johnson" },
         },
         {
-            coach: "Mike Davis",
+            id: 3,
+            capacity_available: 8,
+            price: 0,
             status: "confirmed",
             start_time: "2025-07-30T11:00:00",
             end_time: "2025-07-30T12:00:00",
-            current_capacity: 8,
+            session_type: "1on1",
+            trainer: { first_name: "Mike", last_name: "Davis" },
         },
     ];
+
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 space-y-6">
