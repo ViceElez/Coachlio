@@ -22,3 +22,30 @@ export async function getClientSessions(trainerId:string) {
         trainer: Array.isArray(session.trainer) ? session.trainer[0] : session.trainer,
     }));
 }
+
+export async function getClientUpcomingSessions(clientId:string) {
+    if(!clientId) return null
+
+    const supabase=await createClient()
+    const { data:bookings,error } = await supabase.from('bookings').select(`id,sessions(id,start_time,end_time,price,capacity_available,status,session_type,trainer:users (first_name,last_name))`)
+        .eq('client_id', clientId)
+        .gte('sessions.start_time', new Date().toISOString())
+
+    if(error) {
+        console.error("Error fetching upcoming sessions:", error);
+        return null;
+    }
+
+    return bookings.map((booking) => {
+        const session = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions
+        const trainer = Array.isArray(session?.trainer) ? session?.trainer[0] : session?.trainer
+
+        return {
+            ...booking,
+            sessions: {
+                ...session,
+                trainer,
+            }
+        }
+    })
+}

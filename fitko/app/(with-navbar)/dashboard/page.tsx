@@ -1,7 +1,8 @@
-import HomeClient from "./DashboardClient";
 import {getProfile} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import {routes} from "@/constants/routes";
+import DashboardClient from "./DashboardClient";
+import {getClientUpcomingSessions} from "@/lib/getSessions";
 
 const MOTIVATIONAL_MESSAGES = [
     "You're doing great! Keep up the momentum 🔥",
@@ -25,7 +26,8 @@ export default async function DashboardPage() {
     if (!profile) redirect(routes.LOGIN);
 
     const motivationalMessage = pickMessage();
+    const upcomingSessions = await getClientUpcomingSessions(profile.id);
 
-    return <HomeClient profile={profile} motivationalMessage={motivationalMessage}
+    return <DashboardClient profile={profile} motivationalMessage={motivationalMessage} upcomingSessions={upcomingSessions ?? []}
     />;
 }

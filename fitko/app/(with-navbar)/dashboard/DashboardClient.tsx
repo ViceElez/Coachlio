@@ -3,51 +3,19 @@
 import { ClientProfile } from "@/constants/interface/clientProfile";
 import Link from "next/link";
 import {UpcomingSessions} from "@/app/(with-navbar)/dashboard/components/UpcomingSessions";
-import {SessionProps} from "@/constants/interface/SessionProps";
 import { Flame, Target, Trophy, TrendingUp } from "lucide-react";
+import {BookingProps} from "@/constants/interface/BookingProps";
 
 
 export default function DashboardClient({
     profile,
     motivationalMessage,
+    upcomingSessions,
 }: {
     profile: ClientProfile;
     motivationalMessage: string;
+    upcomingSessions: BookingProps[];
 }) {
-
-    const upcomingSessions: SessionProps[] = [
-        {
-            id: 1,
-            capacity_available: 5,
-            price: 0,
-            status: "confirmed",
-            start_time: "2025-07-25T09:00:00",
-            end_time: "2025-07-25T10:00:00",
-            session_type: "1on1",
-            trainer: { first_name: "John", last_name: "Smith" },
-        },
-        {
-            id: 2,
-            capacity_available: 3,
-            price: 0,
-            status: "pending",
-            start_time: "2025-07-27T14:00:00",
-            end_time: "2025-07-27T15:30:00",
-            session_type: "group",
-            trainer: { first_name: "Sarah", last_name: "Johnson" },
-        },
-        {
-            id: 3,
-            capacity_available: 8,
-            price: 0,
-            status: "confirmed",
-            start_time: "2025-07-30T11:00:00",
-            end_time: "2025-07-30T12:00:00",
-            session_type: "1on1",
-            trainer: { first_name: "Mike", last_name: "Davis" },
-        },
-    ];
-
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 space-y-6">

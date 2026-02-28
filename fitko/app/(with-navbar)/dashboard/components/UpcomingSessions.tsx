@@ -1,8 +1,8 @@
 import {Calendar} from "lucide-react";
-import {SessionProps} from "@/constants/interface/SessionProps";
+import {BookingProps} from "@/constants/interface/BookingProps";
 
-export const UpcomingSessions = (session: SessionProps) => {
-    const isConfirmed = session.status.toLowerCase() === "confirmed";
+export const UpcomingSessions = (session: BookingProps) => {
+    const isConfirmed = session.sessions.status === "scheduled";
 
     return (
         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-emerald-100 hover:bg-emerald-50/30 transition-colors">
@@ -11,9 +11,9 @@ export const UpcomingSessions = (session: SessionProps) => {
                     <Calendar className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
-                    <p className="font-bold text-gray-900">{session.trainer.first_name} {session.trainer.last_name}</p>
+                    <p className="font-bold text-gray-900">{session.sessions.trainer.first_name} {session.sessions.trainer.last_name}</p>
                     <p className="text-sm text-emerald-500 font-medium">Personal Training</p>
-                    <p className="text-xs text-amber-500 mt-0.5">{session.start_time}</p>
+                    <p className="text-xs text-amber-500 mt-0.5">{session.sessions.start_time}</p>
                 </div>
             </div>
             <span
@@ -23,7 +23,7 @@ export const UpcomingSessions = (session: SessionProps) => {
                         : "bg-yellow-100 text-yellow-700"
                 }`}
             >
-                {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
+                {session.sessions.status.charAt(0).toUpperCase() + session.sessions.status.slice(1)}
             </span>
         </div>
     );
