@@ -10,6 +10,12 @@ export const routes:Routes={
     ACTIVATEACCOUNT: '/activate',
     DASHBOARD: '/dashboard',
     BOOK: '/book',
+    PROGRESS: '/progress',
+    MESSAGES: '/messages',
+    HELP: '/help',
+    CONTACT: '/contact',
+    PRIVACY: '/privacy',
+    TERMS: '/terms',
     ERROR: '/error',
     NO_PAGE_FOUND: '*'
 }

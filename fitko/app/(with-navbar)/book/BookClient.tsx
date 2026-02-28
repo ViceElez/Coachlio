@@ -58,16 +58,12 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
             return 0;
         });
 
-    console.log("trainer data:", availableSessions[0].trainer);
-
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Main content */}
             <main className="max-w-6xl mx-auto px-6 py-10">
                 <h1 className="text-2xl font-bold text-gray-900">Browse &amp; Book Sessions</h1>
                 <p className="text-gray-500 mt-1 mb-6">Find the perfect training session that fits your schedule</p>
 
-                {/* Search + Filters */}
                 <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 mb-8">
                     <div className="relative mb-4">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -111,7 +107,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                         ))}
                     </div>
                 </div>
-                {/* Session Grid */}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filtered.map((session) => {
                         const trainerName = session.trainer

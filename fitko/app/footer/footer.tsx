@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Instagram, Twitter, Youtube } from "lucide-react";
-
+import { FooterColumn } from "@/app/footer/components/FooterColumn";
+import {routes} from "@/constants/routes";
 export const Footer = () => {
     return (
         <footer className="bg-white border-t border-gray-200 px-8 py-10">
@@ -28,51 +28,37 @@ export const Footer = () => {
                         </a>
                     </div>
                 </div>
+                <FooterColumn
+                    title="Product"
+                    links={[
+                        { label: "Dashboard", href: routes.DASHBOARD },
+                        { label: "Book a Session", href: routes.BOOK },
+                        { label: "Progress", href: routes.PROGRESS },
+                        { label: "Messages", href: routes.MESSAGES },
+                    ]}
+                />
 
-                {/* Product */}
-                <div className="flex flex-col gap-3">
-                    <p className="font-semibold text-gray-900 text-sm">Product</p>
-                    <ul className="flex flex-col gap-2">
-                        {["Dashboard", "Book a Session", "Progress", "Messages"].map((item) => (
-                            <li key={item}>
-                                <Link href="#" className="text-sm text-gray-500 hover:text-emerald-600 transition-colors">
-                                    {item}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <FooterColumn
+                    title="Company"
+                    links={[
+                        { label: "About Us", href: "/about" },
+                        { label: "Careers", href: "/careers" },
+                        { label: "Blog", href: "/blog" },
+                        { label: "Press", href: "/press" },
+                    ]}
+                />
 
-                {/* Company */}
-                <div className="flex flex-col gap-3">
-                    <p className="font-semibold text-gray-900 text-sm">Company</p>
-                    <ul className="flex flex-col gap-2">
-                        {["About Us", "Careers", "Blog", "Press"].map((item) => (
-                            <li key={item}>
-                                <Link href="#" className="text-sm text-gray-500 hover:text-emerald-600 transition-colors">
-                                    {item}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Support */}
-                <div className="flex flex-col gap-3">
-                    <p className="font-semibold text-gray-900 text-sm">Support</p>
-                    <ul className="flex flex-col gap-2">
-                        {["Help Center", "Contact Us", "Privacy Policy", "Terms of Service"].map((item) => (
-                            <li key={item}>
-                                <Link href="#" className="text-sm text-gray-500 hover:text-emerald-600 transition-colors">
-                                    {item}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <FooterColumn
+                    title="Support"
+                    links={[
+                        { label: "Help Center", href: routes.HELP },
+                        { label: "Contact Us", href: routes.CONTACT },
+                        { label: "Privacy Policy", href: routes.PRIVACY},
+                        { label: "Terms of Service", href: routes.TERMS },
+                    ]}
+                />
             </div>
 
-            {/* Bottom bar */}
             <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-2">
                 <p className="text-xs text-gray-400">© {new Date().getFullYear()} Fittonia. All rights reserved.</p>
                 <p className="text-xs text-gray-400">Made with <span className="text-emerald-500">♥</span> for a healthier you.</p>
