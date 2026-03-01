@@ -27,7 +27,7 @@ export async function getClientUpcomingSessions(clientId:string) {
     if(!clientId) return null
 
     const supabase=await createClient()
-    const { data:bookings,error } = await supabase.from('bookings').select(`id,sessions(id,start_time,end_time,price,capacity_available,status,session_type,trainer:users (first_name,last_name))`)
+    const { data:bookings,error } = await supabase.from('bookings').select(`id, sessions!inner(id,start_time,end_time,price,capacity_available,status,session_type,trainer:users (first_name,last_name))`)
         .eq('client_id', clientId)
         .gte('sessions.start_time', new Date().toISOString())
 

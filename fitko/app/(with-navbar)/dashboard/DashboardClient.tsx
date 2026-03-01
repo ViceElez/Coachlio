@@ -5,6 +5,7 @@ import Link from "next/link";
 import {UpcomingSessions} from "@/app/(with-navbar)/dashboard/components/UpcomingSessions";
 import { Flame, Target, Trophy, TrendingUp } from "lucide-react";
 import {BookingProps} from "@/constants/interface/BookingProps";
+import {routes} from "@/constants/routes";
 
 
 export default function DashboardClient({
@@ -28,20 +29,20 @@ export default function DashboardClient({
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-gray-900">Upcoming Sessions</h2>
                         <Link
-                            href="/book"
+                            href={routes.BOOK}
                             className="text-sm font-medium border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors"
                         >
                             Book More
                         </Link>
                     </div>
-                    <div className="space-y-4">
+                    {upcomingSessions.length === 0 ? <h1>No upcoming sessions</h1> :
+                        <div className="space-y-4">
                         {upcomingSessions.map((session, i) => (
                             <UpcomingSessions key={i} {...session} />
                         ))}
-                    </div>
+                    </div>}
                 </div>
 
-                {/* Quick Stats */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4">
                     <h2 className="text-lg font-semibold text-gray-900">Quick Stats</h2>
                     <div className="grid grid-cols-2 gap-4 flex-1">
