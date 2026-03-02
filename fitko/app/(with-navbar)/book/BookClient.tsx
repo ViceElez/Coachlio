@@ -9,6 +9,7 @@ import {
     Search,
 } from "lucide-react";
 import { SessionProps } from "@/constants/interface/SessionProps";
+import ConfirmToCheckout from "./components/ConfirmToCheckout";
 
 const SESSION_TYPE_FILTERS = ["All", "1on1", "group"];
 const SORT_OPTIONS = ["Most Capacity", "Least Capacity", "Lowest Price", "Highest Price"];
@@ -26,14 +27,23 @@ function formatTime(iso: string) {
 }
 
 function getDuration(start: string, end: string) {
-    const mins = (new Date(end).getTime() - new Date(start).getTime()) / 60000;
-    return mins >= 60 ? `${mins / 60}h` : `${mins} min`;
+    const minsFloat = (new Date(end).getTime() - new Date(start).getTime()) / 60000;
+    const mins = Math.round(minsFloat);
+
+    if (mins >= 60) {
+        const hours = Math.floor(mins / 60);
+        const remainingMins = mins % 60;
+        return remainingMins === 0 ? `${hours}h` : `${hours}h ${remainingMins}m`;
+    }
+
+    return `${mins} min`;
 }
 
 export default function BookClient({ availableSessions }: { profile: ClientProfile, availableSessions: SessionProps[] }) {
     const [typeFilter, setTypeFilter] = useState("All");
     const [sortOption, setSortOption] = useState("Most Capacity");
     const [search, setSearch] = useState("");
+    const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
 
     const filtered = availableSessions
         .filter((s) => {
@@ -60,6 +70,12 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {selectedSession && (
+                <ConfirmToCheckout
+                    session={selectedSession}
+                    onClose={() => setSelectedSession(null)}
+                />
+            )}
             <main className="max-w-6xl mx-auto px-6 py-10">
                 <h1 className="text-2xl font-bold text-gray-900">Browse &amp; Book Sessions</h1>
                 <p className="text-gray-500 mt-1 mb-6">Find the perfect training session that fits your schedule</p>
@@ -150,7 +166,9 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                                         <span className="text-2xl font-bold text-emerald-500">${session.price}</span>
                                         <p className="text-xs text-gray-400 mt-0.5">{getDuration(session.start_time, session.end_time)}</p>
                                     </div>
-                                    <button className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                    <button
+                                            onClick={() => setSelectedSession(session)}
+                                            className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
                                         Book Now
                                     </button>
                                 </div>
