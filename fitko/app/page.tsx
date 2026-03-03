@@ -15,7 +15,7 @@ import {
     Shield,
     Smartphone
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { HeaderButtons } from "./landing/components/header";
 import { routes } from "@/constants/routes";
 import { useRouter } from "next/navigation";

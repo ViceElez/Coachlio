@@ -9,35 +9,11 @@ import {
     Search,
 } from "lucide-react";
 import { SessionProps } from "@/constants/interface/SessionProps";
-import ConfirmToCheckout from "./components/ConfirmToCheckout";
+import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
+import {ConfirmToCheckout} from "./components/ConfirmToCheckout";
 
 const SESSION_TYPE_FILTERS = ["All", "1on1", "group"];
 const SORT_OPTIONS = ["Most Capacity", "Least Capacity", "Lowest Price", "Highest Price"];
-
-function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-US", {
-        month: "short", day: "numeric", year: "numeric",
-    });
-}
-
-function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString("en-US", {
-        hour: "2-digit", minute: "2-digit",
-    });
-}
-
-function getDuration(start: string, end: string) {
-    const minsFloat = (new Date(end).getTime() - new Date(start).getTime()) / 60000;
-    const mins = Math.round(minsFloat);
-
-    if (mins >= 60) {
-        const hours = Math.floor(mins / 60);
-        const remainingMins = mins % 60;
-        return remainingMins === 0 ? `${hours}h` : `${hours}h ${remainingMins}m`;
-    }
-
-    return `${mins} min`;
-}
 
 export default function BookClient({ availableSessions }: { profile: ClientProfile, availableSessions: SessionProps[] }) {
     const [typeFilter, setTypeFilter] = useState("All");
@@ -166,7 +142,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                                         <span className="text-2xl font-bold text-emerald-500">${session.price}</span>
                                         <p className="text-xs text-gray-400 mt-0.5">{getDuration(session.start_time, session.end_time)}</p>
                                     </div>
-                    <button
+                                    <button
                                             onClick={() => setSelectedSession(session)}
                                             className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
                                         Book Now
@@ -176,9 +152,11 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                         );
                     })}
 
+
                     {filtered.length === 0 && (
                         <p className="col-span-2 text-center text-gray-400 py-16">No sessions found.</p>
                     )}
+
                 </div>
             </main>
         </div>

@@ -1,162 +1,147 @@
 "use client";
 
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { X, Calendar, Clock, Timer, Users, DollarSign, User } from "lucide-react";
 import { SessionProps } from "@/constants/interface/SessionProps";
-import { Calendar, Clock, Users, X, DollarSign, User } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime"
+import {ConfirmToCheckoutProps} from "@/constants/interface/ConfirmToCheckoutProps";
 
-interface ConfirmToCheckoutProps {
-    session: SessionProps;
-    onClose: () => void;
-}
+export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) => {
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
 
-function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-    });
-}
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [onClose]);
 
-function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-}
+    const portalRoot =
+        typeof document !== "undefined"
+            ? (document.getElementById("portal-root") ?? document.body)
+            : null;
 
-function getDuration(start: string, end: string) {
-    const mins = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
-    return mins >= 60 ? `${Math.round(mins / 60)}h` : `${mins} min`;
-}
-
-export default function ConfirmToCheckout({ session, onClose }: ConfirmToCheckoutProps) {
-    const router = useRouter();
+    if (!portalRoot) return null;
 
     const trainerName = session.trainer
         ? `${session.trainer.first_name} ${session.trainer.last_name}`
         : "Unknown Trainer";
 
-    const isOneOnOne = session.session_type === "1on1";
+    const typeLabel = session.session_type === "1on1" ? "1-on-1 Session" : "Group Session";
+    const typeColor =
+        session.session_type === "1on1"
+            ? "bg-emerald-100 text-emerald-700"
+            : "bg-gray-100 text-gray-700";
 
-    function handleContinue() {
-        // TODO: replace with actual payout route once payout page is created
-        router.push("");
-    }
-
-    return (
-        <AnimatePresence>
-            {/* Backdrop */}
-            <motion.div
-                key="backdrop"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
-                onClick={onClose}
+    return createPortal(
+        <div
+            className="fixed inset-0 flex items-center justify-center px-4"
+            style={{ zIndex: 9999 }}
+            onClick={onClose}
+        >
+            <div className="absolute inset-0 bg-black/50" />
+            <div
+                className="relative w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Modal panel */}
-                <motion.div
-                    key="modal"
-                    initial={{ opacity: 0, scale: 0.93, y: 12 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.93, y: 12 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 flex flex-col gap-6 relative"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    {/* Close button */}
+                <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">Confirm Booking</h2>
+                        <p className="text-sm text-gray-500 mt-0.5">Review the session details below</p>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
-                        aria-label="Close"
+                        className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
+                        aria-label="Close modal"
                     >
                         <X className="w-5 h-5" />
                     </button>
+                </div>
 
-                    {/* Header */}
-                    <div className="pr-6">
-                        <h2 className="text-2xl font-bold text-gray-900 leading-snug">Confirm Booking</h2>
-                        <p className="text-sm text-gray-500 mt-1 leading-relaxed">Review your session details before continuing</p>
-                    </div>
-
-                    {/* Session info card */}
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 flex flex-col gap-4">
-                        {/* Trainer + badge */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                    <User className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-900 leading-snug">{trainerName}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">Trainer</p>
-                                </div>
+                <div className="px-6 py-5 space-y-4">
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <User className="w-5 h-5 text-emerald-600" />
                             </div>
-                            <span
-                                className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                                    isOneOnOne
-                                        ? "bg-emerald-500 text-white"
-                                        : "bg-gray-100 text-gray-700"
-                                }`}
-                            >
-                                {isOneOnOne ? "1-on-1" : "Group"}
-                            </span>
-                        </div>
-
-                        {/* Details grid */}
-                        <div className="flex flex-col gap-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
-                            <span className="flex items-center gap-2.5 leading-relaxed">
-                                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-                                {formatDate(session.start_time)}
-                            </span>
-                            <div className="grid grid-cols-2 gap-3">
-                                <span className="flex items-center gap-2.5 leading-relaxed">
-                                    <Clock className="w-4 h-4 text-gray-400 shrink-0" />
-                                    {formatTime(session.start_time)}
-                                </span>
-                                <span className="flex items-center gap-2.5 leading-relaxed">
-                                    <Clock className="w-4 h-4 text-gray-400 shrink-0" />
-                                    {getDuration(session.start_time, session.end_time)} duration
-                                </span>
-                                <span className="flex items-center gap-2.5 leading-relaxed">
-                                    <Users className="w-4 h-4 text-gray-400 shrink-0" />
-                                    {session.capacity_available} spots left
-                                </span>
+                            <div>
+                                <p className="font-semibold text-gray-900">{trainerName}</p>
+                                <p className="text-xs text-gray-500">Trainer</p>
                             </div>
                         </div>
+                        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${typeColor}`}>
+                            {typeLabel}
+                        </span>
                     </div>
 
-                    {/* Price summary */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-5">
-                        <div className="flex items-center gap-2 text-gray-500">
-                            <DollarSign className="w-4 h-4" />
-                            <span className="text-sm font-medium">Total</span>
+                    <div className="border-t border-gray-100" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+                            <div>
+                                <p className="text-xs text-gray-400">Date</p>
+                                <p className="font-medium text-gray-800">{formatDate(session.start_time)}</p>
+                            </div>
                         </div>
-                        <span className="text-3xl font-bold text-emerald-500">${session.price}</span>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Clock className="w-4 h-4 text-gray-400 shrink-0" />
+                            <div>
+                                <p className="text-xs text-gray-400">Time</p>
+                                <p className="font-medium text-gray-800">{formatTime(session.start_time)}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Timer className="w-4 h-4 text-gray-400 shrink-0" />
+                            <div>
+                                <p className="text-xs text-gray-400">Duration</p>
+                                <p className="font-medium text-gray-800">{getDuration(session.start_time, session.end_time)}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Users className="w-4 h-4 text-gray-400 shrink-0" />
+                            <div>
+                                <p className="text-xs text-gray-400">Spots left</p>
+                                <p className="font-medium text-gray-800">{session.capacity_available}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-4 mt-1">
-                        <button
-                            onClick={onClose}
-                            className="flex-1 py-3 px-6 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleContinue}
-                            className="flex-1 py-3 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
-                        >
-                            Continue to Payment
-                        </button>
+                    <div className="border-t border-gray-100" />
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <DollarSign className="w-4 h-4 text-gray-400" />
+                            <span>Total</span>
+                        </div>
+                        <span className="text-2xl font-bold text-emerald-500">${session.price}</span>
                     </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
+                </div>
+
+                <div className="px-6 pb-6 flex gap-3">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
+                    >
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>,
+        portalRoot
     );
-}
-
-
+};
