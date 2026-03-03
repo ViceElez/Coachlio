@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { X, Calendar, Clock, Timer, Users, DollarSign, User } from "lucide-react";
-import { SessionProps } from "@/constants/interface/SessionProps";
-import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime"
-import {ConfirmToCheckoutProps} from "@/constants/interface/ConfirmToCheckoutProps";
+import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
+import { ConfirmToCheckoutProps } from "@/constants/interface/ConfirmToCheckoutProps";
+import { routes } from "@/constants/routes";
 
 export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) => {
+    const router = useRouter();
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -135,6 +137,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                         Cancel
                     </button>
                     <button
+                        onClick={() => router.push(`${routes.CHECKOUT}`)}
                         className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
                     >
                         Confirm Booking

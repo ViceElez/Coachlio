@@ -10,6 +10,7 @@ export const routes:Routes={
     ACTIVATEACCOUNT: '/activate',
     DASHBOARD: '/dashboard',
     BOOK: '/book',
+    CHECKOUT: '/payment',
     PROGRESS: '/progress',
     MESSAGES: '/messages',
     HELP: '/help',
