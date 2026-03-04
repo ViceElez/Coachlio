@@ -44,19 +44,19 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
 
     return createPortal(
         <div
-            className="fixed inset-0 flex items-center justify-center px-4"
+            className="fixed inset-0 flex items-center justify-center px-4 py-6"
             style={{ zIndex: 9999 }}
             onClick={onClose}
         >
             <div className="absolute inset-0 bg-black/50" />
             <div
-                className="relative w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
+                className="relative w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+                <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-gray-100 shrink-0">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">Confirm Booking</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">Review the session details below</p>
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900">Confirm Booking</h2>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Review the session details below</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -67,7 +67,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                     </button>
                 </div>
 
-                <div className="px-6 py-5 space-y-4">
+                <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4 overflow-y-auto flex-1">
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -129,7 +129,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                     </div>
                 </div>
 
-                <div className="px-6 pb-6 flex gap-3">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex gap-3 shrink-0 border-t border-gray-100 pt-4">
                     <button
                         onClick={onClose}
                         className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"

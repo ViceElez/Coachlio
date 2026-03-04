@@ -15,7 +15,7 @@ export async function createBookingSession(sessionId:number, clientId:string) {
         })
         .select()
         .single();
-    
+
     if(error) {
         console.error("Error creating booking session:", error);
         throw new Error("Failed to create booking session.");

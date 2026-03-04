@@ -52,11 +52,11 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                     onClose={() => setSelectedSession(null)}
                 />
             )}
-            <main className="max-w-6xl mx-auto px-6 py-10">
-                <h1 className="text-2xl font-bold text-gray-900">Browse &amp; Book Sessions</h1>
-                <p className="text-gray-500 mt-1 mb-6">Find the perfect training session that fits your schedule</p>
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Browse &amp; Book Sessions</h1>
+                <p className="text-gray-500 text-sm sm:text-base mt-1 mb-4 sm:mb-6">Find the perfect training session that fits your schedule</p>
 
-                <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 mb-8">
+                <div className="bg-white border border-gray-200 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 mb-6 sm:mb-8">
                     <div className="relative mb-4">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -72,7 +72,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                             <button
                                 key={f}
                                 onClick={() => setTypeFilter(f)}
-                                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                                className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                                     typeFilter === f
                                         ? "bg-emerald-500 text-white border-emerald-500"
                                         : "bg-white text-gray-700 border-gray-200 hover:border-emerald-400"
@@ -82,13 +82,14 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                             </button>
                         ))}
                     </div>
-                    <div className="mt-4 flex items-center gap-3 flex-wrap">
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
                         <span className="text-sm text-gray-500">Sort by:</span>
                         {SORT_OPTIONS.map((option) => (
                             <button
                                 key={option}
                                 onClick={() => setSortOption(option)}
-                                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                                className={`px-3 py-2 rounded-full text-sm font-medium border transition-colors ${
                                     sortOption === option
                                         ? "bg-emerald-500 text-white border-emerald-500"
                                         : "bg-white text-gray-700 border-gray-200 hover:border-emerald-400"
@@ -100,7 +101,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {filtered.map((session) => {
                         const trainerName = session.trainer
                             ? `${session.trainer.first_name} ${session.trainer.last_name}`
@@ -111,40 +112,41 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                                 : "bg-gray-100 text-gray-700";
 
                         return (
-                            <div key={session.id} className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col gap-4">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-gray-900">{trainerName}</h2>
+                            <div key={session.id} className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col gap-4">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">{trainerName}</h2>
                                         <p className="text-sm text-gray-500 mt-0.5 capitalize">{session.session_type === "1on1" ? "1-on-1 Session" : "Group Session"}</p>
                                     </div>
-                                    <span className={`text-xs font-semibold px-3 py-0.5 rounded-full capitalize ${typeColor}`}>
+                                    <span className={`text-xs font-semibold px-3 py-0.5 rounded-full capitalize shrink-0 ${typeColor}`}>
                                         {session.session_type === "1on1" ? "1-on-1" : "Group"}
                                     </span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-600">
                                     <span className="flex items-center gap-2">
-                                        <Calendar className="w-4 h-4 text-gray-400" />
-                                        {formatDate(session.start_time)}
+                                        <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
+                                        <span className="truncate">{formatDate(session.start_time)}</span>
                                     </span>
                                     <span className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-gray-400" />
-                                        {formatTime(session.start_time)}
+                                        <Clock className="w-4 h-4 text-gray-400 shrink-0" />
+                                        <span className="truncate">{formatTime(session.start_time)}</span>
                                     </span>
                                     <span className="flex items-center gap-2">
-                                        <Users className="w-4 h-4 text-gray-400" />
+                                        <Users className="w-4 h-4 text-gray-400 shrink-0" />
                                         {session.capacity_available} spots left
                                     </span>
                                 </div>
 
-                                <div className="border-t border-gray-100 pt-4 flex items-end justify-between">
+                                <div className="border-t border-gray-100 pt-4 flex items-end justify-between gap-3">
                                     <div>
                                         <span className="text-2xl font-bold text-emerald-500">${session.price}</span>
                                         <p className="text-xs text-gray-400 mt-0.5">{getDuration(session.start_time, session.end_time)}</p>
                                     </div>
                                     <button
-                                            onClick={() => setSelectedSession(session)}
-                                            className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                                        onClick={() => setSelectedSession(session)}
+                                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors shrink-0"
+                                    >
                                         Book Now
                                     </button>
                                 </div>
@@ -152,9 +154,8 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                         );
                     })}
 
-
                     {filtered.length === 0 && (
-                        <p className="col-span-2 text-center text-gray-400 py-16">No sessions found.</p>
+                        <p className="col-span-full text-center text-gray-400 py-16">No sessions found.</p>
                     )}
 
                 </div>
