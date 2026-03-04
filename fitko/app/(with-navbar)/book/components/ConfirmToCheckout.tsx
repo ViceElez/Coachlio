@@ -137,7 +137,14 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                         Cancel
                     </button>
                     <button
-                        onClick={() => router.push(`${routes.CHECKOUT}`)}
+                        onClick={() => {
+                            try {
+                                sessionStorage.setItem('checkout_session', JSON.stringify(session));
+                            } catch(e) {
+                                console.error("Failed to save session data for checkout:", e);
+                            }
+                            router.push(routes.CHECKOUT);
+                        }}
                         className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
                     >
                         Confirm Booking
