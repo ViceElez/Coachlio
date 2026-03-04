@@ -2,7 +2,7 @@ import {getProfile} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import {routes} from "@/constants/routes";
 import DashboardClient from "./DashboardClient";
-import {getClientUpcomingSessions} from "@/lib/getSessions";
+import {getClientUpcomingSessions} from "@/lib/session";
 
 const MOTIVATIONAL_MESSAGES = [
     "You're doing great! Keep up the momentum 🔥",
