@@ -1,44 +1,77 @@
+"use server"
+
 import {createClient} from "@/utils/supabase/server";
+import Stripe from "stripe";
+import {convertToSubcurrency} from "@/lib/helper/convertToSubcurrency";
 
-export async function createBookingSession(sessionId:number, clientId:string) {
-    if(!sessionId || !clientId) {
-        throw new Error("Session ID and Client ID are required to create a booking session.");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+})
+
+export async function reserveSession(sessionId: number) {
+    const supabase = await createClient()
+
+
+    const { data: session, error: sessionError } = await supabase
+        .from("sessions")
+        .select("price")
+        .eq("id", sessionId)
+        .single()
+
+    if (sessionError || !session) throw new Error("Session not found")
+
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: convertToSubcurrency(session.price),
+        currency: "eur",
+        automatic_payment_methods: { enabled: true },
+        metadata: { sessionId: String(sessionId) },
+    })
+
+    const { data: booking, error: rpcError } = await supabase.rpc("reserve_session", {
+        p_session_id: sessionId,
+        p_client_secret: paymentIntent.client_secret,
+        p_payment_intent_id: paymentIntent.id,
+    })
+
+    if (rpcError) {
+        await stripe.paymentIntents.cancel(paymentIntent.id)
+        throw new Error(rpcError.message)
     }
 
-    const supabase=await createClient()
-    const { data: booking, error } = await supabase
-        .from('bookings')
-        .insert({
-            session_id: sessionId,
-            client_id: clientId,
-            expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
-        })
-        .select()
-        .single();
-
-    if(error) {
-        console.error("Error creating booking session:", error);
-        throw new Error("Failed to create booking session.");
-    }
-
-    return booking;
+    return booking
 }
 
-export async function deleteBookingSession(bookingId:number){
-    if(!bookingId) {
-        throw new Error("Booking ID is required to delete a booking session.");
+export async function getBookingSession(bookingId: number) {
+    const supabase = await createClient()
+
+    const { data: booking, error } = await supabase.from('bookings').select(`id,stripe_client_secret,stripe_payment_intent_id, sessions!inner(id,price,trainer:users (first_name,last_name))`)
+        .eq("id", bookingId)
+        .single()
+
+    if (error) {
+        console.error("Error fetching booking:", error)
+        throw new Error("Unable to fetch booking. Please try again later.")
     }
 
-    const supabase=await createClient()
-    const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId);
-
-    if(error) {
-        console.error("Error deleting booking session:", error);
-        throw new Error("Failed to delete booking session.");
+    if (!booking) {
+        console.error("Booking not found for id:", bookingId)
+        throw new Error("Booking not found.")
     }
 
-    return true;
+    const session = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions
+
+    if (!session) {
+        console.error("No session found for booking:", booking)
+        throw new Error("Session data not available for this booking.")
+    }
+
+    const trainer = Array.isArray(session?.trainer) ? session?.trainer[0] : session?.trainer
+
+    return {
+        ...booking,
+        sessions: {
+            ...session,
+            trainer,
+        }
+    }
 }

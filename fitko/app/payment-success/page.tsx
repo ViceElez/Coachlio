@@ -1,7 +1,32 @@
-import Link from "next/link";
-import {routes} from "@/constants/routes";
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { routes } from "@/constants/routes"
+import { createClient } from "@/utils/supabase/server"
+import Stripe from "stripe"
 
-export default function PaymentSuccess() {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2026-02-25.clover",
+})
+
+export default async function PaymentSuccess({
+                                                 searchParams,
+                                             }: {
+    searchParams: Promise<{ payment_intent: string }>
+}) {
+    const { payment_intent } = await searchParams
+
+    if (!payment_intent) redirect("/")
+
+    const intent = await stripe.paymentIntents.retrieve(payment_intent)
+
+    if (intent.status !== "succeeded") redirect("/")
+
+    const supabase = await createClient()
+    await supabase
+        .from("bookings")
+        .update({ status: "paid" })
+        .eq("stripe_payment_intent_id", intent.id)
+
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
             <div className="w-full max-w-md text-center">
@@ -14,7 +39,7 @@ export default function PaymentSuccess() {
 
                     <h1 className="text-2xl font-bold text-gray-900">Payment Confirmed</h1>
                     <p className="text-gray-500 mt-3 leading-relaxed">
-                        Thank you! Your order has been successfully completed. A confirmation will be sent to your account.
+                        Thank you! Your session has been successfully booked. A confirmation will be sent to your account.
                     </p>
 
                     <div className="border-t border-gray-100 mt-8 pt-8 flex flex-col gap-3">
@@ -34,5 +59,5 @@ export default function PaymentSuccess() {
                 </div>
             </div>
         </div>
-    );
+    )
 }

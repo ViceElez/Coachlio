@@ -7,6 +7,7 @@ import { X, Calendar, Clock, Timer, Users, DollarSign, User } from "lucide-react
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { ConfirmToCheckoutProps } from "@/constants/interface/ConfirmToCheckoutProps";
 import { routes } from "@/constants/routes";
+import {reserveSession} from "@/lib/bookSession";
 
 export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) => {
     const router = useRouter();
@@ -41,6 +42,16 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
         session.session_type === "1on1"
             ? "bg-emerald-100 text-emerald-700"
             : "bg-gray-100 text-gray-700";
+
+    const handleConfirm = async () => {
+        try {
+            const booking = await reserveSession(session.id)
+            router.push(`${routes.CHECKOUT}/${booking.id}`)
+        } catch (e: any) {
+            console.error(e)
+            alert(e.message)
+        }
+    }
 
     return createPortal(
         <div
@@ -137,14 +148,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                         Cancel
                     </button>
                     <button
-                        onClick={() => {
-                            try {
-                                sessionStorage.setItem('checkout_session', JSON.stringify(session));
-                            } catch(e) {
-                                console.error("Failed to save session data for checkout:", e);
-                            }
-                            router.push(routes.CHECKOUT);
-                        }}
+                        onClick={() => {handleConfirm()}}
                         className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
                     >
                         Confirm Booking
