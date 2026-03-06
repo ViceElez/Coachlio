@@ -1,16 +1,14 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { routes } from "@/constants/routes"
-import { createClient } from "@/utils/supabase/server"
 import Stripe from "stripe"
+import {updateBookingStatus} from "@/lib/bookSession";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
 })
 
-export default async function PaymentSuccess({
-                                                 searchParams,
-                                             }: {
+export default async function PaymentSuccess({searchParams,}: {
     searchParams: Promise<{ payment_intent: string }>
 }) {
     const { payment_intent } = await searchParams
@@ -19,13 +17,10 @@ export default async function PaymentSuccess({
 
     const intent = await stripe.paymentIntents.retrieve(payment_intent)
 
-    if (intent.status !== "succeeded") redirect("/")
-
-    const supabase = await createClient()
-    await supabase
-        .from("bookings")
-        .update({ status: "paid" })
-        .eq("stripe_payment_intent_id", intent.id)
+    if (intent.status === "succeeded")
+        await updateBookingStatus(intent.id)
+    else
+        redirect("/")
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">

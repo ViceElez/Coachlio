@@ -8,7 +8,7 @@ const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!
 )
 
-export default function PaymentClient({amount, clientSecret,}: {
+export default function PaymentClient({amount, clientSecret}: {
     amount: number
     clientSecret: string
 }) {

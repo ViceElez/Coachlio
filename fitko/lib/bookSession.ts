@@ -75,3 +75,60 @@ export async function getBookingSession(bookingId: number) {
         }
     }
 }
+
+export async function updateBookingStatus(intentId: string) {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from("bookings")
+        .update({ status: "paid" })
+        .eq("stripe_payment_intent_id", intentId)
+        .single()
+
+    if (error) {
+        console.error("Error updating booking status:", error)
+        throw new Error("Unable to update booking status. Please try again later.")
+    }
+
+    return data
+}
+
+export async function cancelBookingSession(clientSecret: string) {
+    const supabase = await createClient()
+
+    const { data: booking, error: fetchError } = await supabase
+        .from("bookings")
+        .select("id, stripe_payment_intent_id, status")
+        .eq("stripe_client_secret", clientSecret)
+        .single()
+
+    if (fetchError || !booking) {
+        console.error("Error fetching booking for cancellation:", fetchError)
+        throw new Error("Unable to find booking. Please try again later.")
+    }
+
+    if (booking.status === "paid") {
+        throw new Error("Cannot cancel a booking that has already been paid.")
+    }
+
+    if (booking.stripe_payment_intent_id) {
+        try {
+            await stripe.paymentIntents.cancel(booking.stripe_payment_intent_id)
+        } catch (stripeError) {
+            console.error("Error cancelling Stripe payment intent:", stripeError)
+        }
+    }
+
+    const { data, error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", booking.id)
+        .single()
+
+    if (error) {
+        console.error("Error cancelling booking:", error)
+        throw new Error("Unable to cancel booking. Please try again later.")
+    }
+
+    return data
+}

@@ -2,15 +2,20 @@
 
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { cancelBookingSession } from "@/lib/bookSession"
+import { routes } from "@/constants/routes"
 
-const CheckoutPage = ({amount, clientSecret,}: {
+const CheckoutPage = ({ amount, clientSecret }: {
     amount: number
     clientSecret: string
 }) => {
     const stripe = useStripe()
     const elements = useElements()
+    const router = useRouter()
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [cancelling, setCancelling] = useState(false)
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -40,6 +45,17 @@ const CheckoutPage = ({amount, clientSecret,}: {
         setLoading(false)
     }
 
+    const handleCancel = async () => {
+        setCancelling(true)
+        try {
+            await cancelBookingSession(clientSecret)
+        } catch (err) {
+            console.error("Cancel error:", err)
+        } finally {
+            router.push(routes.BOOK)
+        }
+    }
+
     if (!stripe || !elements) {
         return (
             <div className="flex flex-col items-center py-10 gap-3">
@@ -63,6 +79,14 @@ const CheckoutPage = ({amount, clientSecret,}: {
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl"
             >
                 {loading ? "Processing..." : `Pay €${amount}`}
+            </button>
+            <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancelling || loading}
+                className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl"
+            >
+                {cancelling ? "Cancelling..." : "Cancel & Go Back"}
             </button>
         </form>
     )
