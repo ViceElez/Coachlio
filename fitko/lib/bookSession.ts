@@ -103,8 +103,11 @@ export async function cancelBookingSession(clientSecret: string) {
         .single()
 
     if (fetchError || !booking) {
-        console.error("Error fetching booking for cancellation:", fetchError)
         throw new Error("Unable to find booking. Please try again later.")
+    }
+
+    if (booking.status === "cancelled") {
+        throw new Error("Booking is already cancelled.")
     }
 
     if (booking.status === "paid") {
@@ -114,21 +117,20 @@ export async function cancelBookingSession(clientSecret: string) {
     if (booking.stripe_payment_intent_id) {
         try {
             await stripe.paymentIntents.cancel(booking.stripe_payment_intent_id)
-        } catch (stripeError) {
-            console.error("Error cancelling Stripe payment intent:", stripeError)
+        } catch (err: any) {
+            if (err.code === "payment_intent_unexpected_state") {
+                await stripe.refunds.create({
+                    payment_intent: booking.stripe_payment_intent_id,
+                })
+            } else {
+                throw new Error("Failed to cancel payment.")
+            }
         }
     }
 
-    const { data, error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", booking.id)
-        .single()
+    const { error: rpcError } = await supabase.rpc("cancel_booking", {
+        p_booking_id: booking.id,
+    })
 
-    if (error) {
-        console.error("Error cancelling booking:", error)
-        throw new Error("Unable to cancel booking. Please try again later.")
-    }
-
-    return data
+    if (rpcError) throw new Error(rpcError.message)
 }
