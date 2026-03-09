@@ -16,3 +16,20 @@ export async function getProfile() {
 
     return profile;
 }
+
+export async function getUserRole(userId: string) {
+    const supabase = await createClient();
+    const { data: userPrivate, error } = await supabase
+        .from('user_private')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+    if(error) {
+        console.error('Error fetching user role:', error);
+        return null;
+    }
+
+    return userPrivate?.role || null;
+
+}

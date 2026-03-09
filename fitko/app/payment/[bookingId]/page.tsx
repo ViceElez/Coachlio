@@ -36,5 +36,3 @@ export default async function PaymentPage({params,}: {
         />
     )
 }
-
-//triba dodat calce botun ako to klikne da autmatski ide na cnacle session, triba provejrit jeli expirea nakon 10min ako stoji reserved, triba refactorat success payemnt page

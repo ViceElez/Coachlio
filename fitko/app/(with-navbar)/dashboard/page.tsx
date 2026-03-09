@@ -1,8 +1,9 @@
-import {getProfile} from "@/lib/getProfile";
+import {getProfile,getUserRole} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import {routes} from "@/constants/routes";
 import DashboardClient from "./DashboardClient";
-import {getClientUpcomingSessions} from "@/lib/session";
+import {getClientUpcomingSessions, getTrainerTodaySessions, getTrainerStats} from "@/lib/session";
+import DashboardTrainer from "./DashboardTrainer";
 
 const MOTIVATIONAL_MESSAGES = [
     "You're doing great! Keep up the momentum 🔥",
@@ -24,6 +25,15 @@ function pickMessage() {
 export default async function DashboardPage() {
     const profile = await getProfile();
     if (!profile) redirect(routes.LOGIN);
+    const role= await getUserRole(profile.id);
+
+    if(role !== "client") {
+        const [todaySessions, trainerStats] = await Promise.all([
+            getTrainerTodaySessions(profile.id),
+            getTrainerStats(profile.id),
+        ]);
+        return <DashboardTrainer profile={profile} todaySessions={todaySessions ?? []} stats={trainerStats} />;
+    }
 
     const motivationalMessage = pickMessage();
     const upcomingSessions = await getClientUpcomingSessions(profile.id);

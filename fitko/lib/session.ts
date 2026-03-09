@@ -1,5 +1,85 @@
 import {createClient} from "@/utils/supabase/server";
 
+export async function getTrainerTodaySessions(trainerId: string) {
+    if (!trainerId) return null;
+
+    const supabase = await createClient();
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const { data: sessions, error } = await supabase
+        .from('sessions')
+        .select(`id, start_time, end_time, session_type, status, price, capacity_available, bookings(id, status, client:users(first_name, last_name))`)
+        .eq('trainer_id', trainerId)
+        .gte('start_time', todayStart.toISOString())
+        .lte('start_time', todayEnd.toISOString())
+        .order('start_time', { ascending: true });
+
+    if (error) {
+        console.error("Error fetching trainer today sessions:", error);
+        return null;
+    }
+
+    return sessions.map((session) => ({
+        ...session,
+        bookings: (Array.isArray(session.bookings) ? session.bookings : []).map((booking: {
+            id: number;
+            status: string;
+            client: { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
+        }) => ({
+            id: booking.id,
+            status: booking.status,
+            client: Array.isArray(booking.client) ? (booking.client[0] ?? null) : booking.client,
+        })),
+    }));
+}
+
+export async function getTrainerStats(trainerId: string) {
+    if (!trainerId) return null;
+
+    const supabase = await createClient();
+
+    const { data: clientsData, error: clientsError } = await supabase
+        .from('bookings')
+        .select(`client_id, sessions!inner(trainer_id)`)
+        .eq('sessions.trainer_id', trainerId)
+        .eq('status', 'paid');
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date();
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const { data: weekSessions, error: weekError } = await supabase
+        .from('sessions')
+        .select(`id, start_time, bookings(id, status)`)
+        .eq('trainer_id', trainerId)
+        .gte('start_time', weekStart.toISOString())
+        .lte('start_time', weekEnd.toISOString());
+
+    if (clientsError) console.error("Error fetching trainer clients:", clientsError);
+    if (weekError) console.error("Error fetching week sessions:", weekError);
+
+    const uniqueClients = clientsData
+        ? new Set(clientsData.map((b: { client_id: string }) => b.client_id)).size
+        : 0;
+
+    const weekSessionsCompleted = weekSessions
+        ? weekSessions.reduce((acc, s) => {
+            const bookings = Array.isArray(s.bookings) ? s.bookings : [];
+            return acc + bookings.filter((b: { status: string }) => b.status === 'paid').length;
+        }, 0)
+        : 0;
+
+    return {
+        totalClients: uniqueClients,
+        weekSessionsCompleted,
+    };
+}
+
 export async function getClientSessions(trainerId:string) {
     if(!trainerId) return null
 
@@ -31,6 +111,7 @@ export async function getClientUpcomingSessions(clientId:string) {
         .eq('client_id', clientId)
         .eq('status', 'paid')
         .gte('sessions.start_time', new Date().toISOString())
+
 
     if(error) {
         console.error("Error fetching upcoming sessions:", error);
