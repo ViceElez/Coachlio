@@ -172,18 +172,28 @@ export default function DashboardTrainer({
                         View All
                     </button>
                 </div>
-
                 {todaySessions.length === 0 ? (
                     <p className="text-gray-400 text-sm">No sessions scheduled for today.</p>
                 ) : (
                     <div className="space-y-3">
                         {todaySessions.map((session) => {
-                            const paidBookings = session.bookings.filter((b) => b.status === "paid");
-                            const firstClient = paidBookings[0]?.client;
-                            const clientName = firstClient
-                                ? `${firstClient.first_name} ${firstClient.last_name}`
-                                : "No client yet";
-                            const isPending = paidBookings.length === 0;
+                            const paidBookings = (session.bookings || []).filter((b) => b.status === "paid");
+                            const clientNames = paidBookings
+                                .map((b) => {
+                                    const c = b.client;
+                                    if (!c) return null;
+                                    return `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim();
+                                })
+                                .filter(Boolean) as string[];
+
+                            const clientPreview =
+                                clientNames.length === 0
+                                    ? "No client yet"
+                                    : clientNames.length <= 2
+                                        ? clientNames.join(", ")
+                                        : `${clientNames.slice(0, 2).join(", ")} +${clientNames.length - 2} more`;
+
+                            const isPending = clientNames.length === 0;
 
                             return (
                                 <div
@@ -195,7 +205,7 @@ export default function DashboardTrainer({
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                                            {clientName}
+                                            {clientPreview}
                                         </p>
                                         <p className="text-xs sm:text-sm text-gray-400">
                                             {formatTime(session.start_time)} &bull;{" "}
@@ -209,7 +219,6 @@ export default function DashboardTrainer({
                                                 : "bg-emerald-500 text-white"
                                         }`}
                                     >
-                                        {isPending ? "pending" : "confirmed"}
                                     </span>
                                 </div>
                             );

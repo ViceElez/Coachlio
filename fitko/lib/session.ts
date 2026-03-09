@@ -1,5 +1,6 @@
 import {createClient} from "@/utils/supabase/server";
 
+// typescript
 export async function getTrainerTodaySessions(trainerId: string) {
     if (!trainerId) return null;
 
@@ -22,19 +23,37 @@ export async function getTrainerTodaySessions(trainerId: string) {
         return null;
     }
 
-    return sessions.map((session) => ({
-        ...session,
-        bookings: (Array.isArray(session.bookings) ? session.bookings : []).map((booking: {
-            id: number;
-            status: string;
-            client: { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
-        }) => ({
-            id: booking.id,
-            status: booking.status,
-            client: Array.isArray(booking.client) ? (booking.client[0] ?? null) : booking.client,
-        })),
-    }));
+    const sessionsArr = sessions || [];
+
+    return sessionsArr.map((session: any) => {
+        const bookingsRaw = session.bookings == null
+            ? []
+            : Array.isArray(session.bookings)
+                ? session.bookings
+                : [session.bookings];
+
+        const bookings = bookingsRaw.map((booking: any) => {
+            let client = booking.client ?? null;
+            if (Array.isArray(client)) client = client[0] ?? null;
+
+            return {
+                id: booking.id,
+                status: booking.status,
+                client,
+            };
+        });
+
+        console.log("Processed session:", {
+            ...session,
+            bookings,
+        })
+        return {
+            ...session,
+            bookings,
+        };
+    });
 }
+
 
 export async function getTrainerStats(trainerId: string) {
     if (!trainerId) return null;
