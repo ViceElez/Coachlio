@@ -13,7 +13,7 @@ import {
     BarChart,
     Bar,
 } from "recharts";
-import { TodaySession } from "@/constants/interface/TodaySession";
+import { TodaySession } from "@/constants/interface/TodaySessionProps";
 import { TrainerStats } from "@/constants/interface/TrainerStatsProps";
 
 const revenueData = [
