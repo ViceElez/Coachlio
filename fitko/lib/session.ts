@@ -1,6 +1,7 @@
+"use server";
+
 import {createClient} from "@/utils/supabase/server";
 
-// typescript
 export async function getTrainerTodaySessions(trainerId: string) {
     if (!trainerId) return null;
 
@@ -53,7 +54,6 @@ export async function getTrainerTodaySessions(trainerId: string) {
         };
     });
 }
-
 
 export async function getTrainerStats(trainerId: string) {
     if (!trainerId) return null;
@@ -149,4 +149,28 @@ export async function getClientUpcomingSessions(clientId:string) {
             }
         }
     })
+}
+
+export async function createSession(trainerId: string, startTime: string, endTime: string, sessionType: string, price: number,capacity: number) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from('sessions')
+        .insert({
+            trainer_id: trainerId,
+            start_time: startTime,
+            end_time: endTime,
+            session_type: sessionType,
+            price,
+            capacity_total: capacity,
+            capacity_available: capacity,
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error("Error creating session:", error);
+        return null;
+    }
+    return data;
 }

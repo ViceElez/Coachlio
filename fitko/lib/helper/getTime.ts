@@ -8,9 +8,10 @@ export function formatDate(iso: string) {
 }
 
 export function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString("en-US", {
+    return new Date(iso).toLocaleTimeString("en-GB", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
     });
 }
 

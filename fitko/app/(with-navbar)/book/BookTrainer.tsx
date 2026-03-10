@@ -7,20 +7,54 @@ import {
     Users,
     DollarSign,
     Tag,
-    FileText,
     CheckCircle2,
+    AlertCircle,
+    Loader2,
 } from "lucide-react";
+import { createSession } from "@/lib/session";
+import { ClientProfile } from "@/constants/interface/clientProfile";
+import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
-export default function BookTrainer() {
+export default function BookTrainer({ profile }: { profile: ClientProfile }) {
     const [sessionType, setSessionType] = useState<"1on1" | "group">("1on1");
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [startTime, setStartTime] = useState("");
+    const [endTime, setEndTime] = useState("");
+    const [capacity, setCapacity] = useState("");
+    const [price, setPrice] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const duration = startTime && endTime ? getDuration(startTime, endTime) : null;
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // logic will be added later
-        setSubmitted(true);
+        setLoading(true);
+        setError(null);
+
+        try {
+            const result = await createSession(
+                profile.id,
+                startTime,
+                endTime,
+                sessionType,
+                parseFloat(price),
+                parseFloat(capacity),
+            );
+
+            if (!result) {
+                setError("Failed to create session. Please try again.");
+                return;
+            }
+
+            setSubmitted(true);
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (submitted) {
@@ -33,7 +67,13 @@ export default function BookTrainer() {
                     <h2 className="text-xl font-bold text-gray-900">Session Created!</h2>
                     <p className="text-sm text-gray-500">Your session has been successfully created and is now visible to clients.</p>
                     <button
-                        onClick={() => setSubmitted(false)}
+                        onClick={() => {
+                            setSubmitted(false);
+                            setStartTime("");
+                            setEndTime("");
+                            setCapacity("");
+                            setPrice("");
+                        }}
                         className="mt-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors w-full"
                     >
                         Create Another Session
@@ -57,7 +97,13 @@ export default function BookTrainer() {
                         onSubmit={handleSubmit}
                         className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col gap-6"
                     >
-                        {/* Session Type */}
+                        {error && (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                {error}
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 <Tag className="w-4 h-4 text-gray-400" />
@@ -81,7 +127,6 @@ export default function BookTrainer() {
                             </div>
                         </div>
 
-                        {/* Date & Time row */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -89,8 +134,11 @@ export default function BookTrainer() {
                                     Start Date &amp; Time
                                 </label>
                                 <input
+                                    name="start_time"
                                     type="datetime-local"
                                     required
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
                             </div>
@@ -100,14 +148,16 @@ export default function BookTrainer() {
                                     End Date &amp; Time
                                 </label>
                                 <input
+                                    name="end_time"
                                     type="datetime-local"
                                     required
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
                             </div>
                         </div>
 
-                        {/* Capacity & Price row */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -115,10 +165,12 @@ export default function BookTrainer() {
                                     {sessionType === "1on1" ? "Capacity (max 1)" : "Capacity"}
                                 </label>
                                 <input
+                                    name="capacity"
                                     type="number"
                                     min={1}
                                     max={sessionType === "1on1" ? 1 : 50}
-                                    defaultValue={sessionType === "1on1" ? 1 : undefined}
+                                    value={capacity}
+                                    onChange={(e) => setCapacity(e.target.value)}
                                     required
                                     placeholder={sessionType === "1on1" ? "1" : "e.g. 10"}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
@@ -130,42 +182,40 @@ export default function BookTrainer() {
                                     Price per Spot ($)
                                 </label>
                                 <input
+                                    name="price"
                                     type="number"
                                     min={0}
                                     step={0.01}
                                     required
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
                                     placeholder="e.g. 60"
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
                             </div>
                         </div>
 
-                        {/* Notes */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-gray-400" />
-                                Session Notes
-                                <span className="text-gray-400 font-normal">(optional)</span>
-                            </label>
-                            <textarea
-                                rows={4}
-                                placeholder="Describe the session, what to bring, focus areas..."
-                                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
-                            />
-                        </div>
-
                         <button
                             type="submit"
-                            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors"
+                            disabled={loading}
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
-                            Create Session
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Creating Session...
+                                </>
+                            ) : (
+                                "Create Session"
+                            )}
                         </button>
                     </form>
 
-                    {/* Preview Card */}
+                    {/* Sidebar */}
                     <div className="flex flex-col gap-4">
                         <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col gap-4">
                             <h3 className="text-sm font-semibold text-gray-700">Session Preview</h3>
+
                             <div className="flex items-start justify-between gap-2">
                                 <div>
                                     <p className="text-base font-bold text-gray-900">Your Session</p>
@@ -173,32 +223,49 @@ export default function BookTrainer() {
                                         {sessionType === "1on1" ? "1-on-1 Session" : "Group Session"}
                                     </p>
                                 </div>
-                                <span
-                                    className={`text-xs font-semibold px-3 py-0.5 rounded-full shrink-0 ${
-                                        sessionType === "1on1"
-                                            ? "bg-emerald-500 text-white"
-                                            : "bg-gray-100 text-gray-700"
-                                    }`}
-                                >
+                                <span className={`text-xs font-semibold px-3 py-0.5 rounded-full shrink-0 ${
+                                    sessionType === "1on1"
+                                        ? "bg-emerald-500 text-white"
+                                        : "bg-gray-100 text-gray-700"
+                                }`}>
                                     {sessionType === "1on1" ? "1-on-1" : "Group"}
                                 </span>
                             </div>
-                            <div className="grid grid-cols-1 gap-y-2 text-sm text-gray-500">
+
+                            <div className="flex flex-col gap-2 text-sm text-gray-500">
                                 <span className="flex items-center gap-2">
                                     <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-                                    Date will appear here
+                                    {startTime ? (
+                                        <span className="text-gray-700 font-medium">{formatDate(startTime)}</span>
+                                    ) : "Date will appear here"}
                                 </span>
                                 <span className="flex items-center gap-2">
                                     <Clock className="w-4 h-4 text-gray-400 shrink-0" />
-                                    Time will appear here
+                                    {startTime && endTime ? (
+                                        <span className="text-gray-700 font-medium">
+                                            {formatTime(startTime)} → {formatTime(endTime)}
+                                            {duration && <span className="text-gray-400 font-normal ml-1">({duration})</span>}
+                                        </span>
+                                    ) : startTime ? (
+                                        <span className="text-gray-700 font-medium">{formatTime(startTime)}</span>
+                                    ) : "Time will appear here"}
                                 </span>
                                 <span className="flex items-center gap-2">
                                     <Users className="w-4 h-4 text-gray-400 shrink-0" />
-                                    Spots will appear here
+                                    {capacity ? (
+                                        <span className="text-gray-700 font-medium">
+                                            {capacity} {parseInt(capacity) === 1 ? "spot" : "spots"}
+                                        </span>
+                                    ) : "Spots will appear here"}
                                 </span>
                             </div>
+
                             <div className="border-t border-gray-100 pt-4">
-                                <span className="text-2xl font-bold text-emerald-500">$—</span>
+                                {price ? (
+                                    <span className="text-2xl font-bold text-emerald-500">${parseFloat(price).toFixed(2)}</span>
+                                ) : (
+                                    <span className="text-2xl font-bold text-emerald-500">$—</span>
+                                )}
                                 <p className="text-xs text-gray-400 mt-0.5">per spot</p>
                             </div>
                         </div>
@@ -218,4 +285,3 @@ export default function BookTrainer() {
         </div>
     );
 }
-

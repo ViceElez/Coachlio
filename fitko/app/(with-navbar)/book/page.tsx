@@ -12,7 +12,7 @@ export default async function BookPage() {
     const role = await getUserRole(profile.id);
 
     if(role !== "client") {
-        return <BookTrainer />;
+        return <BookTrainer profile={profile} />;
     }
 
     const clientSessions=await getClientSessions(profile?.trainer_id)
