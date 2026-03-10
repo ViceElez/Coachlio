@@ -44,10 +44,6 @@ export async function getTrainerTodaySessions(trainerId: string) {
             };
         });
 
-        console.log("Processed session:", {
-            ...session,
-            bookings,
-        })
         return {
             ...session,
             bookings,
@@ -69,12 +65,13 @@ export async function getTrainerStats(trainerId: string) {
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     weekStart.setHours(0, 0, 0, 0);
-    const weekEnd = new Date();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
     weekEnd.setHours(23, 59, 59, 999);
 
     const { data: weekSessions, error: weekError } = await supabase
         .from('sessions')
-        .select(`id, start_time, bookings(id, status)`)
+        .select(`id, start_time,end_time, bookings(id, status)`)
         .eq('trainer_id', trainerId)
         .gte('start_time', weekStart.toISOString())
         .lte('start_time', weekEnd.toISOString());
@@ -86,16 +83,36 @@ export async function getTrainerStats(trainerId: string) {
         ? new Set(clientsData.map((b: { client_id: string }) => b.client_id)).size
         : 0;
 
-    const weekSessionsCompleted = weekSessions
-        ? weekSessions.reduce((acc, s) => {
+    const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayCountMap: Record<string, number> = {
+        Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0,
+    };
+    let weekSessionsCompleted = 0;
+
+    if (weekSessions) {
+        const now = new Date();
+        for (const s of weekSessions) {
             const bookings = Array.isArray(s.bookings) ? s.bookings : [];
-            return acc + bookings.filter((b: { status: string }) => b.status === 'paid').length;
-        }, 0)
-        : 0;
+            const paidCount = bookings.filter((b: { status: string }) => b.status === 'paid').length;
+            if (paidCount > 0) {
+                const dayLabel = DAY_LABELS[new Date(s.start_time).getDay()];
+                dayCountMap[dayLabel] = (dayCountMap[dayLabel] ?? 0) + paidCount;
+                if (new Date(s.end_time) < now) {
+                    weekSessionsCompleted += paidCount;
+                }
+            }
+        }
+    }
+
+    const weeklySessionData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => ({
+        day,
+        sessions: dayCountMap[day],
+    }));
 
     return {
         totalClients: uniqueClients,
         weekSessionsCompleted,
+        weeklySessionData,
     };
 }
 

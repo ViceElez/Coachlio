@@ -1,5 +1,5 @@
 export function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("en-US", {
+    return new Date(iso).toLocaleDateString("hr-HR", {
         weekday: "long",
         month: "long",
         day: "numeric",
@@ -8,7 +8,7 @@ export function formatDate(iso: string) {
 }
 
 export function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString("en-GB", {
+    return new Date(iso).toLocaleTimeString("hr-HR", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,

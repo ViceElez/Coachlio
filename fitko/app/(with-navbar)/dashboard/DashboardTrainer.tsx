@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { TodaySession } from "@/constants/interface/TodaySessionProps";
 import { TrainerStats } from "@/constants/interface/TrainerStatsProps";
+import { formatTime } from "@/lib/helper/getTime";
 
 const revenueData = [
     { month: "Jan", revenue: 4200 },
@@ -25,15 +26,6 @@ const revenueData = [
     { month: "Jun", revenue: 8100 },
 ];
 
-const weeklyData = [
-    { day: "Mon", sessions: 8 },
-    { day: "Tue", sessions: 12 },
-    { day: "Wed", sessions: 10 },
-    { day: "Thu", sessions: 14 },
-    { day: "Fri", sessions: 11 },
-    { day: "Sat", sessions: 5 },
-    { day: "Sun", sessions: 4 },
-];
 
 
 export default function DashboardTrainer({
@@ -45,10 +37,6 @@ export default function DashboardTrainer({
     todaySessions: TodaySession[];
     stats: TrainerStats | null;
 }) {
-    const formatTime = (iso: string) => {
-        return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    };
-
     const statCards = [
         {
             label: "Total Clients",
@@ -150,7 +138,7 @@ export default function DashboardTrainer({
                 <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
                     <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Weekly Sessions</h2>
                     <ResponsiveContainer width="100%" height={220}>
-                        <BarChart data={weeklyData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                        <BarChart data={stats?.weeklySessionData ?? []} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="day" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                             <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
