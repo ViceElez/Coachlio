@@ -152,7 +152,6 @@ export default function DashboardTrainer({
                 </div>
             </div>
 
-            {/* Today's Sessions */}
             <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-base sm:text-lg font-semibold text-gray-900">Today&apos;s Sessions</h2>

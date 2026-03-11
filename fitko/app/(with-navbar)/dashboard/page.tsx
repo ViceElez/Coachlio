@@ -32,7 +32,6 @@ export default async function DashboardPage() {
             getTrainerTodaySessions(profile.id),
             getTrainerStats(profile.id),
         ]);
-        console.log("Trainer dashboard data:", { trainerStats });
         return <DashboardTrainer profile={profile} todaySessions={todaySessions ?? []} stats={trainerStats} />;
     }
 
@@ -41,4 +40,4 @@ export default async function DashboardPage() {
 
     return <DashboardClient profile={profile} motivationalMessage={motivationalMessage} upcomingSessions={upcomingSessions ?? []}
     />;
-} //triba fixat da se booking za group session ne broji zasebno, nego da samo brojni ukupne sessione
+} //triba fixat da se booking za group session ne broji zasebno, nego da samo brojni ukupne sessione, triba ove hardcoded podatke maknit i povezat s bazon da se iz tu izvlaci
