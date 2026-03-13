@@ -21,6 +21,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
     const [search, setSearch] = useState("");
     const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
 
+    console.log("Available sessions:", availableSessions);
     const filtered = availableSessions
         .filter((s) => {
             const trainerName = s.trainer

@@ -2,7 +2,7 @@ import {getProfile, getUserRole} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import BookClient from "./BookClient";
 import {routes} from "@/constants/routes";
-import {getClientSessions} from "@/lib/session";
+import {getClientSessions, getClientUpcomingSessions} from "@/lib/session";
 import BookTrainer from "./BookTrainer";
 
 export default async function BookPage() {
@@ -15,7 +15,7 @@ export default async function BookPage() {
         return <BookTrainer profile={profile} />;
     }
 
-    const clientSessions=await getClientSessions(profile?.trainer_id)
+    const clientSessions=await getClientSessions(profile?.trainer_id,profile?.id)
 
     return <>
         <BookClient profile={profile} availableSessions={clientSessions ?? []} />
