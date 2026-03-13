@@ -21,5 +21,3 @@ export default async function BookPage() {
         <BookClient profile={profile} availableSessions={clientSessions ?? []} />
     </>
 }
-
-//na book client triba fetchat i koje je on vec bukirao da se ne prikazuju te sesije
