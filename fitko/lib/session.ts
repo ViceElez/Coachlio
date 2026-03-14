@@ -117,7 +117,7 @@ export async function getTrainerStats(trainerId: string) {
 }
 
 export async function getClientSessions(trainerId:string,clientId:string) {
-    if(!trainerId) return null
+    if(!trainerId||!clientId) return null
 
     const supabase=await createClient()
 
@@ -163,6 +163,9 @@ export async function getClientUpcomingSessions(clientId:string) {
 }
 
 export async function createSession(trainerId: string, startTime: string, endTime: string, sessionType: string, price: number,capacity: number) {
+
+    if(!trainerId||!startTime||!endTime||!sessionType||!price||!capacity) return null
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -184,4 +187,35 @@ export async function createSession(trainerId: string, startTime: string, endTim
         return null;
     }
     return data;
+}
+
+export async function calculateMonthlySessionsProfit(trainerId: string) {
+    if (!trainerId) return null;
+
+    const supabase = await createClient();
+
+    const now = new Date();
+
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    const { data, error } = await supabase
+        .from("sessions")
+        .select(`capacity_total, capacity_available, price`)
+        .eq("trainer_id", trainerId)
+        .gte("start_time", startOfMonth.toISOString())
+        .lt("start_time", startOfNextMonth.toISOString());
+
+    if (error) {
+        console.error("Error calculating session profit:", error);
+        return null;
+    }
+
+    let totalProfit = 0;
+
+    data?.forEach((session) => {
+        totalProfit += session.price * (session.capacity_total - session.capacity_available);
+    });
+
+    return totalProfit;
 }

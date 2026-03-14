@@ -1,7 +1,7 @@
 "use client";
 
 import { ClientProfile } from "@/constants/interface/clientProfile";
-import { Users, DollarSign, Activity, TrendingUp, Clock } from "lucide-react";
+import { Users, DollarSign, Activity, Clock } from "lucide-react";
 import {
     AreaChart,
     Area,
@@ -32,10 +32,12 @@ export default function DashboardTrainer({
     profile,
     todaySessions,
     stats,
+    monthlyProfit
 }: {
     profile: ClientProfile;
     todaySessions: TodaySession[];
     stats: TrainerStats | null;
+    monthlyProfit:number | null
 }) {
     const statCards = [
         {
@@ -48,8 +50,7 @@ export default function DashboardTrainer({
         },
         {
             label: "Monthly Revenue",
-            value: "$8,100",
-            sub: "+18% vs last month",
+            value: monthlyProfit,
             subColor: "text-emerald-500",
             icon: <DollarSign className="w-6 h-6 text-emerald-500" />,
             iconBg: "bg-emerald-100",
@@ -61,14 +62,6 @@ export default function DashboardTrainer({
             subColor: "text-gray-400",
             icon: <Activity className="w-6 h-6 text-blue-400" />,
             iconBg: "bg-blue-100",
-        },
-        {
-            label: "Retention Rate",
-            value: "94%",
-            sub: "Above target",
-            subColor: "text-purple-500",
-            icon: <TrendingUp className="w-6 h-6 text-purple-500" />,
-            iconBg: "bg-purple-100",
         },
     ];
 
@@ -85,11 +78,11 @@ export default function DashboardTrainer({
             </div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
                 {statCards.map((card) => (
                     <div
                         key={card.label}
-                        className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex items-center justify-between gap-4"
+                        className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex items-center justify-between gap-4 h-full"
                     >
                         <div className="flex flex-col gap-1">
                             <p className="text-xs sm:text-sm text-gray-400">{card.label}</p>
@@ -132,6 +125,10 @@ export default function DashboardTrainer({
                             />
                         </AreaChart>
                     </ResponsiveContainer>
+
+                    <p className="mt-3 text-xs text-gray-400">
+                        This chart is a placeholder preview — live revenue data will be shown here soon.
+                    </p>
                 </div>
 
                 {/* Weekly Sessions */}

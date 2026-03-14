@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { createSession } from "@/lib/session";
 import { ClientProfile } from "@/constants/interface/clientProfile";
-import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
+import {formatDate, formatTime, getDuration, localDatetimeToISOString} from "@/lib/helper/getTime";
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
@@ -35,10 +35,12 @@ export default function BookTrainer({ profile }: { profile: ClientProfile }) {
         setError(null);
 
         try {
+            const startTimeIso=localDatetimeToISOString(startTime)
+            const endTimeIso=localDatetimeToISOString(endTime)
             const result = await createSession(
                 profile.id,
-                startTime,
-                endTime,
+                startTimeIso,
+                endTimeIso,
                 sessionType,
                 parseFloat(price),
                 parseFloat(capacity),
@@ -54,6 +56,17 @@ export default function BookTrainer({ profile }: { profile: ClientProfile }) {
             setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const validateTimes = (start: string, end: string) => {
+        const startInput = document.getElementsByName("start_time")[0] as HTMLInputElement;
+        const endInput = document.getElementsByName("end_time")[0] as HTMLInputElement;
+
+        if (start && end && new Date(start) >= new Date(end)) {
+            endInput.setCustomValidity("End time must be after start time.");
+        } else {
+            endInput.setCustomValidity("");
         }
     };
 
@@ -92,7 +105,6 @@ export default function BookTrainer({ profile }: { profile: ClientProfile }) {
                 </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Form */}
                     <form
                         onSubmit={handleSubmit}
                         className="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 flex flex-col gap-6"
@@ -138,8 +150,11 @@ export default function BookTrainer({ profile }: { profile: ClientProfile }) {
                                     type="datetime-local"
                                     required
                                     value={startTime}
-                                    onChange={(e) => setStartTime(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                                    onChange={(e) => {
+                                        setStartTime(e.target.value);
+                                        validateTimes(e.target.value, endTime);
+                                    }}
+                                    className="w-full px-4 py-3 border border-gray-200 rounde   d-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
                             </div>
                             <div className="flex flex-col gap-2">
@@ -151,8 +166,12 @@ export default function BookTrainer({ profile }: { profile: ClientProfile }) {
                                     name="end_time"
                                     type="datetime-local"
                                     required
+                                    min={startTime}
                                     value={endTime}
-                                    onChange={(e) => setEndTime(e.target.value)}
+                                    onChange={(e) => {
+                                        setEndTime(e.target.value);
+                                        validateTimes(startTime, e.target.value);
+                                    }}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
                             </div>
