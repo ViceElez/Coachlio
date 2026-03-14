@@ -17,7 +17,17 @@ export function formatTime(iso: string) {
 
 export function getDuration(start: string, end: string) {
     const mins = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
-    return mins >= 60 ? `${Math.round(mins / 60)}h` : `${mins} min`;
+    if (!Number.isFinite(mins)) return "";
+
+    const absMins = Math.abs(mins);
+    const sign = mins < 0 ? "-" : "";
+
+    const hours = Math.floor(absMins / 60);
+    const minutes = absMins % 60;
+
+    if (hours === 0) return `${sign}${minutes} min`;
+    if (minutes === 0) return `${sign}${hours}h`;
+    return `${sign}${hours}h ${minutes}m`;
 }
 
 export function localDatetimeToISOString(datetimeLocal: string) {
