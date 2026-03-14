@@ -46,4 +46,4 @@ export default async function DashboardPage() {
 
     return <DashboardClient profile={profile} motivationalMessage={motivationalMessage} upcomingSessions={upcomingSessions ?? []}
     />;
-} //triba fixat da se booking za group session ne broji zasebno, nego da samo brojni ukupne sessione, triba ove hardcoded podatke maknit i povezat s bazon da se iz tu izvlaci
+} //triba fixat da se booking za group session ne broji zasebno

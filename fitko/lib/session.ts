@@ -62,12 +62,16 @@ export async function getTrainerStats(trainerId: string) {
         .eq('sessions.trainer_id', trainerId)
         .eq('status', 'paid');
 
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    weekStart.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + diffToMonday);
+    weekStart.setHours(0,0,0,0);
+
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+    weekEnd.setHours(23,59,59,999);
 
     const { data: weekSessions, error: weekError } = await supabase
         .from('sessions')
@@ -90,16 +94,15 @@ export async function getTrainerStats(trainerId: string) {
     let weekSessionsCompleted = 0;
 
     if (weekSessions) {
-        const now = new Date();
         for (const s of weekSessions) {
-            const bookings = Array.isArray(s.bookings) ? s.bookings : [];
-            const paidCount = bookings.filter((b: { status: string }) => b.status === 'paid').length;
-            if (paidCount > 0) {
-                const dayLabel = DAY_LABELS[new Date(s.start_time).getDay()];
-                dayCountMap[dayLabel] = (dayCountMap[dayLabel] ?? 0) + paidCount;
-                if (new Date(s.end_time) < now) {
-                    weekSessionsCompleted += paidCount;
-                }
+            const paidExists = s.bookings?.some(
+                (b: { status: string }) => b.status === "paid"
+            );
+            if (!paidExists) continue;
+            const dayLabel = DAY_LABELS[new Date(s.start_time).getDay()];
+            dayCountMap[dayLabel] += 1;
+            if (new Date(s.end_time) < now) {
+                weekSessionsCompleted += 1;
             }
         }
     }
