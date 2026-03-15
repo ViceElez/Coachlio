@@ -222,3 +222,23 @@ export async function calculateMonthlySessionsProfit(trainerId: string) {
 
     return totalProfit;
 }
+
+export async function getAllUpcomingSessions(trainerId:string) {
+    if(!trainerId) return null
+
+    const supabase=await createClient()
+
+    const { data,error } = await supabase.from('sessions')
+        .select(`id, start_time, end_time, session_type, price, capacity_available,status`)
+        .eq('trainer_id', trainerId)
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true });
+
+    if(error) {
+        console.error("Error fetching upcoming sessions:", error);
+        return null;
+    }
+
+    return data
+}
+

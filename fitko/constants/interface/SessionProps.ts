@@ -6,8 +6,8 @@ export interface SessionProps {
     end_time: string;
     status: string;
     session_type: "group" | "1on1";
-    trainer: {
+    trainer?: {
         first_name: string
         last_name: string
-    }
+    }|null
 }
