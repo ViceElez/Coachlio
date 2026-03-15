@@ -4,8 +4,29 @@ import { ClientProfile } from "@/constants/interface/clientProfile";
 import { SessionProps } from "@/constants/interface/SessionProps";
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { Calendar, Clock, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import CreateSession from "./components/CreateSession";
 
 export default function BookTrainer({ profile,availableSessions }: { profile: ClientProfile,availableSessions:SessionProps[] }) {
+
+    const [createOpen, setCreateOpen] = useState(false);
+
+    useEffect(() => {
+        if (!createOpen) return;
+
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setCreateOpen(false);
+        };
+        window.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            document.body.style.overflow = prevOverflow;
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [createOpen]);
 
     const upcomingSessions = [...availableSessions]
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
@@ -26,8 +47,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                     <button
                         type="button"
                         onClick={() => {
-                            // TODO: wire up create session flow
-                            console.log("create-session:placeholder");
+                            setCreateOpen(true);
                         }}
                         className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors"
                     >
@@ -35,6 +55,25 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                         Create a session
                     </button>
                 </div>
+
+                {createOpen && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <button
+                            type="button"
+                            className="absolute inset-0 bg-black/40"
+                            aria-label="Close create session modal"
+                            onClick={() => setCreateOpen(false)}
+                        />
+
+                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
+                            <CreateSession profile={profile} onClose={() => setCreateOpen(false)} />
+                        </div>
+                    </div>
+                )}
 
                 <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
                     <div className="flex items-center justify-between gap-4 mb-4">

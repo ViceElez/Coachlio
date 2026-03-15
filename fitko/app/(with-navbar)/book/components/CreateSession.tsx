@@ -10,6 +10,7 @@ import {
     CheckCircle2,
     AlertCircle,
     Loader2,
+    X,
 } from "lucide-react";
 import { createSession } from "@/lib/session";
 import { ClientProfile } from "@/constants/interface/clientProfile";
@@ -17,7 +18,13 @@ import {formatDate, formatTime, getDuration, localDatetimeToISOString} from "@/l
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
-export default function CreateSession({ profile }: { profile: ClientProfile }) {
+export default function CreateSession({
+    profile,
+    onClose,
+}: {
+    profile: ClientProfile;
+    onClose?: () => void;
+}) {
     const [sessionType, setSessionType] = useState<"1on1" | "group">("1on1");
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -60,7 +67,6 @@ export default function CreateSession({ profile }: { profile: ClientProfile }) {
     };
 
     const validateTimes = (start: string, end: string) => {
-        const startInput = document.getElementsByName("start_time")[0] as HTMLInputElement;
         const endInput = document.getElementsByName("end_time")[0] as HTMLInputElement;
 
         if (start && end && new Date(start) >= new Date(end)) {
@@ -72,13 +78,14 @@ export default function CreateSession({ profile }: { profile: ClientProfile }) {
 
     if (submitted) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-                <div className="bg-white border border-gray-200 rounded-2xl p-8 sm:p-12 flex flex-col items-center gap-4 max-w-md w-full text-center shadow-sm">
-                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-900">Session Created!</h2>
-                    <p className="text-sm text-gray-500">Your session has been successfully created and is now visible to clients.</p>
+            <div className="bg-white rounded-2xl p-8 sm:p-10 flex flex-col items-center gap-4 max-w-md w-full text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Session Created!</h2>
+                <p className="text-sm text-gray-500">Your session has been successfully created and is now visible to clients.</p>
+
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                     <button
                         onClick={() => {
                             setSubmitted(false);
@@ -87,9 +94,16 @@ export default function CreateSession({ profile }: { profile: ClientProfile }) {
                             setCapacity("");
                             setPrice("");
                         }}
-                        className="mt-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors w-full"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
                     >
-                        Create Another Session
+                        Create Another
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onClose?.()}
+                        className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+                    >
+                        Close
                     </button>
                 </div>
             </div>
@@ -97,13 +111,25 @@ export default function CreateSession({ profile }: { profile: ClientProfile }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create a Session</h1>
-                <p className="text-gray-500 text-sm sm:text-base mt-1 mb-4 sm:mb-6">
-                    Set up a new training session for your clients to book
-                </p>
+        <div className="bg-white">
+            <div className="flex items-start justify-between gap-4 px-4 sm:px-6 pt-5">
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create a Session</h1>
+                    <p className="text-gray-500 text-sm sm:text-base mt-1">
+                        Set up a new training session for your clients to book
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={() => onClose?.()}
+                    className="p-2 rounded-xl hover:bg-gray-50 border border-gray-200"
+                    aria-label="Close"
+                >
+                    <X className="w-4 h-4 text-gray-600" />
+                </button>
+            </div>
 
+            <div className="px-4 sm:px-6 pb-6 pt-4">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <form
                         onSubmit={handleSubmit}
@@ -300,7 +326,7 @@ export default function CreateSession({ profile }: { profile: ClientProfile }) {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 }
