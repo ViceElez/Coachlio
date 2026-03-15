@@ -242,3 +242,29 @@ export async function getAllUpcomingSessions(trainerId:string) {
     return data
 }
 
+export async function deleteSession(sessionId:number,trainerId:string) {
+    if(!sessionId || !trainerId) return null;
+
+    const supabase=await createClient();
+
+    const { data, error } = await supabase
+        .from('sessions')
+        .update({ status: 'cancelled' })
+        .eq('id', sessionId)
+        .eq('trainer_id', trainerId)
+        .eq('status', 'scheduled')
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Error deleting session:", error);
+        return null;
+    }
+    return data;
+}
+
+export async function editSession(sessionId:number,trainerId:string, startTime: string, endTime: string, sessionType: string, price: number,capacity: number) {
+    if(!sessionId || !trainerId || !startTime || !endTime || !sessionType || !price || !capacity) return null
+
+    const supabase=await createClient();
+}

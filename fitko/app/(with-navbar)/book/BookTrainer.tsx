@@ -6,9 +6,11 @@ import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { Calendar, Clock, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import CreateSession from "./components/CreateSession";
+import {deleteSession} from "@/lib/session";
 
 export default function BookTrainer({ profile,availableSessions }: { profile: ClientProfile,availableSessions:SessionProps[] }) {
 
+    const [sessions, setSessions] = useState<SessionProps[]>(availableSessions);
     const [createOpen, setCreateOpen] = useState(false);
 
     useEffect(() => {
@@ -28,7 +30,16 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
         };
     }, [createOpen]);
 
-    const upcomingSessions = [...availableSessions]
+    const handleDeleteSession=async (sessionId:number)=>{
+        try{
+            await deleteSession(sessionId, profile.id);
+            setSessions(prev => prev.filter(session => session.id !== sessionId));
+        }catch(e){
+            return
+        }
+    }
+
+    const upcomingSessions = [...sessions]
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
 
     const trainerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ");
@@ -131,8 +142,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                // TODO: wire up edit session flow
-                                                console.log("edit-session:placeholder", session.id);
+                                                //implement
                                             }}
                                             className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
                                         >
@@ -142,8 +152,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                // TODO: wire up delete session flow
-                                                console.log("delete-session:placeholder", session.id);
+                                                handleDeleteSession(session.id)
                                             }}
                                             className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
                                         >
