@@ -7,16 +7,16 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 type DeleteSessionProps = {
 	open: boolean;
 	session: SessionProps | null;
-	onClose: () => void;
-	onConfirm: (session: SessionProps) => Promise<void> | void;
+	onCloseAction: () => void;
+	onConfirmAction: (session: SessionProps) => Promise<void> | void;
 	isLoading?: boolean;
 };
 
 export default function DeleteSession({
 	open,
 	session,
-	onClose,
-	onConfirm,
+	onCloseAction,
+	onConfirmAction,
 	isLoading = false,
 }: DeleteSessionProps) {
 	if (!open || !session) return null;
@@ -31,7 +31,7 @@ export default function DeleteSession({
 				aria-label="Close delete session modal"
 				onClick={() => {
 					if (isLoading) return;
-					onClose();
+					onCloseAction();
 				}}
 			/>
 
@@ -53,7 +53,7 @@ export default function DeleteSession({
 						type="button"
 						onClick={() => {
 							if (isLoading) return;
-							onClose();
+							onCloseAction();
 						}}
 						className="rounded-xl p-2 text-gray-500 hover:bg-gray-100 transition-colors"
 						aria-label="Close"
@@ -91,7 +91,7 @@ export default function DeleteSession({
 							type="button"
 							onClick={() => {
 								if (isLoading) return;
-								onClose();
+								onCloseAction();
 							}}
 							className="inline-flex items-center justify-center text-sm font-semibold px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
 						>
@@ -99,7 +99,7 @@ export default function DeleteSession({
 						</button>
 						<button
 							type="button"
-							onClick={() => onConfirm(session)}
+							onClick={() => onConfirmAction(session)}
 							disabled={isLoading}
 							className="inline-flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
 						>

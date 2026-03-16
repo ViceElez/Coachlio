@@ -20,10 +20,10 @@ const SESSION_TYPES = ["1on1", "group"] as const;
 
 export default function CreateSession({
     profile,
-    onClose,
+    onCloseAction,
 }: {
     profile: ClientProfile;
-    onClose?: () => void;
+    onCloseAction?: () => void;
 }) {
     const [sessionType, setSessionType] = useState<"1on1" | "group">("1on1");
     const [submitted, setSubmitted] = useState(false);
@@ -100,7 +100,7 @@ export default function CreateSession({
                     </button>
                     <button
                         type="button"
-                        onClick={() => onClose?.()}
+                        onClick={() => onCloseAction?.()}
                         className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
                     >
                         Close
@@ -121,7 +121,7 @@ export default function CreateSession({
                 </div>
                 <button
                     type="button"
-                    onClick={() => onClose?.()}
+                    onClick={() => onCloseAction?.()}
                     className="p-2 rounded-xl hover:bg-gray-50 border border-gray-200"
                     aria-label="Close"
                 >

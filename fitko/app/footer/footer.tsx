@@ -41,20 +41,20 @@ export const Footer = () => {
                 <FooterColumn
                     title="Company"
                     links={[
-                        { label: "About Us", href: "/about" },
-                        { label: "Careers", href: "/careers" },
-                        { label: "Blog", href: "/blog" },
-                        { label: "Press", href: "/press" },
+                        { label: "About Us", href: "/" },
+                        { label: "Careers", href: "/" },
+                        { label: "Blog", href: "/" },
+                        { label: "Press", href: "/" },
                     ]}
                 />
 
                 <FooterColumn
                     title="Support"
                     links={[
-                        { label: "Help Center", href: routes.HELP },
-                        { label: "Contact Us", href: routes.CONTACT },
-                        { label: "Privacy Policy", href: routes.PRIVACY},
-                        { label: "Terms of Service", href: routes.TERMS },
+                        { label: "Help Center", href: "/" },
+                        { label: "Contact Us", href: "/" },
+                        { label: "Privacy Policy", href: "/"},
+                        { label: "Terms of Service", href: "/" },
                     ]}
                 />
             </div>

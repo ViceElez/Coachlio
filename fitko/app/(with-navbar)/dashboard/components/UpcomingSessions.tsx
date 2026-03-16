@@ -11,7 +11,7 @@ export const UpcomingSessions = (session: BookingProps) => {
                     <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
                 </div>
                 <div className="min-w-0">
-                    <p className="font-bold text-gray-900 text-sm sm:text-lg truncate">{session.sessions.trainer.first_name} {session.sessions.trainer.last_name}</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-lg truncate">{session.sessions.trainer?.first_name} {session.sessions.trainer?.last_name}</p>
                     <p className="text-xs sm:text-sm text-emerald-500 font-medium">Personal Training</p>
                     <p className="text-xs sm:text-sm text-amber-500 mt-1 truncate">{formatDate(session.sessions.start_time)}, {formatTime(session.sessions.start_time)}</p>
                 </div>

@@ -31,7 +31,6 @@ export default function PaymentClient({amount, clientSecret}: {
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                     <CheckoutPage amount={amount} clientSecret={clientSecret} />
                 </Elements>
-
             </div>
         </div>
     )

@@ -108,7 +108,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                         />
 
                         <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
-                            <CreateSession profile={profile} onClose={() => setCreateOpen(false)} />
+                            <CreateSession profile={profile} onCloseAction={() => setCreateOpen(false)} />
                         </div>
                     </div>
                 )}
@@ -135,9 +135,9 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                 <DeleteSession
                     open={deleteOpen}
                     session={selectedSession}
-                    onClose={closeDelete}
+                    onCloseAction={closeDelete}
                     isLoading={deleteLoading}
-                    onConfirm={(session) => handleDeleteSession(session.id)}
+                    onConfirmAction={(session) => handleDeleteSession(session.id)}
                 />
 
                 <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
