@@ -79,19 +79,22 @@ export default function EditSession({
 
 	if (submitted) {
 		return (
-			<div className="bg-white rounded-2xl p-8 sm:p-10 flex flex-col items-center gap-4 max-w-md w-full text-center">
-				<div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-					<CheckCircle2 className="w-8 h-8 text-emerald-500" />
-				</div>
-				<h2 className="text-xl font-bold text-gray-900">Changes Saved</h2>
+			<div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+				<div className="absolute inset-0 bg-black/40" aria-hidden="true" />
+				<div className="relative bg-white rounded-2xl p-8 sm:p-10 flex flex-col items-center gap-4 max-w-md w-full text-center mx-auto shadow-xl">
+					<div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+						<CheckCircle2 className="w-8 h-8 text-emerald-500" />
+					</div>
+					<h2 className="text-xl font-bold text-gray-900">Changes Saved. Please Refresh The Page.</h2>
 
-				<button
-					type="button"
-					onClick={() => onCloseAction?.()}
-					className="mt-2 border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors w-full"
-				>
-					Close
-				</button>
+					<button
+						type="button"
+						onClick={() => onCloseAction?.()}
+						className="mt-2 border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors w-full"
+					>
+						Close
+					</button>
+				</div>
 			</div>
 		);
 	}

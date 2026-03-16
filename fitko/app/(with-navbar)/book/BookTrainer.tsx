@@ -8,16 +8,19 @@ import { useEffect, useState } from "react";
 import CreateSession from "./components/CreateSession";
 import {deleteSession} from "@/lib/session";
 import EditSession from "./components/EditSession";
+import DeleteSession from "./components/DeleteSession";
 
 export default function BookTrainer({ profile,availableSessions }: { profile: ClientProfile,availableSessions:SessionProps[] }) {
 
     const [sessions, setSessions] = useState<SessionProps[]>(availableSessions);
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
-        if (!createOpen && !editOpen) return;
+        if (!createOpen && !editOpen && !deleteOpen) return;
 
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
@@ -26,6 +29,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
             if (e.key === "Escape") {
                 setCreateOpen(false);
                 setEditOpen(false);
+                setDeleteOpen(false);
                 setSelectedSession(null);
             }
         };
@@ -35,19 +39,30 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
             document.body.style.overflow = prevOverflow;
             window.removeEventListener("keydown", onKeyDown);
         };
-    }, [createOpen, editOpen]);
+    }, [createOpen, editOpen, deleteOpen]);
 
     const closeEdit = () => {
         setEditOpen(false);
         setSelectedSession(null);
     };
 
+    const closeDelete = () => {
+        if (deleteLoading) return;
+        setDeleteOpen(false);
+        setSelectedSession(null);
+    };
+
     const handleDeleteSession=async (sessionId:number)=>{
         try{
+            setDeleteLoading(true);
             await deleteSession(sessionId, profile.id);
             setSessions(prev => prev.filter(session => session.id !== sessionId));
+            setDeleteOpen(false);
+            setSelectedSession(null);
         }catch(e){
             return
+        } finally {
+            setDeleteLoading(false);
         }
     }
 
@@ -117,6 +132,14 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                     </div>
                 )}
 
+                <DeleteSession
+                    open={deleteOpen}
+                    session={selectedSession}
+                    onClose={closeDelete}
+                    isLoading={deleteLoading}
+                    onConfirm={(session) => handleDeleteSession(session.id)}
+                />
+
                 <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
                     <div className="flex items-center justify-between gap-4 mb-4">
                         <h2 className="text-base sm:text-lg font-semibold text-gray-900">Upcoming sessions</h2>
@@ -184,7 +207,8 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                handleDeleteSession(session.id)
+                                                setSelectedSession(session);
+                                                setDeleteOpen(true);
                                             }}
                                             className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
                                         >
