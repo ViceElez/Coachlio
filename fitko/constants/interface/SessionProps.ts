@@ -1,5 +1,6 @@
 export interface SessionProps {
     id: number;
+    capacity_total?:number
     capacity_available: number;
     price: number;
     start_time: string;

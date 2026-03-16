@@ -7,20 +7,27 @@ import { Calendar, Clock, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import CreateSession from "./components/CreateSession";
 import {deleteSession} from "@/lib/session";
+import EditSession from "./components/EditSession";
 
 export default function BookTrainer({ profile,availableSessions }: { profile: ClientProfile,availableSessions:SessionProps[] }) {
 
     const [sessions, setSessions] = useState<SessionProps[]>(availableSessions);
     const [createOpen, setCreateOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
 
     useEffect(() => {
-        if (!createOpen) return;
+        if (!createOpen && !editOpen) return;
 
         const prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setCreateOpen(false);
+            if (e.key === "Escape") {
+                setCreateOpen(false);
+                setEditOpen(false);
+                setSelectedSession(null);
+            }
         };
         window.addEventListener("keydown", onKeyDown);
 
@@ -28,7 +35,12 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
             document.body.style.overflow = prevOverflow;
             window.removeEventListener("keydown", onKeyDown);
         };
-    }, [createOpen]);
+    }, [createOpen, editOpen]);
+
+    const closeEdit = () => {
+        setEditOpen(false);
+        setSelectedSession(null);
+    };
 
     const handleDeleteSession=async (sessionId:number)=>{
         try{
@@ -86,6 +98,25 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                     </div>
                 )}
 
+                {editOpen && selectedSession && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        role="dialog"
+                        aria-modal="true"
+                    >
+                        <button
+                            type="button"
+                            className="absolute inset-0 bg-black/40"
+                            aria-label="Close edit session modal"
+                            onClick={closeEdit}
+                        />
+
+                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
+                            <EditSession profileId={profile.id} session={selectedSession} onCloseAction={closeEdit} />
+                        </div>
+                    </div>
+                )}
+
                 <section className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6">
                     <div className="flex items-center justify-between gap-4 mb-4">
                         <h2 className="text-base sm:text-lg font-semibold text-gray-900">Upcoming sessions</h2>
@@ -131,7 +162,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         </span>
                                         <span className="flex items-center gap-2">
                                             <Users className="w-4 h-4 text-gray-400 shrink-0" />
-                                            <span className="truncate">{session.capacity_available} spots left</span>
+                                            <span className="truncate">{session.capacity_available} spot(s) out of {session.capacity_total} left</span>
                                         </span>
                                         <span className="flex items-center justify-end">
                                             <span className="text-emerald-600 font-semibold">${session.price}</span>
@@ -142,7 +173,8 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                //implement
+                                                setSelectedSession(session);
+                                                setEditOpen(true);
                                             }}
                                             className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
                                         >

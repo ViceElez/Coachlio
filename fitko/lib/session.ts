@@ -229,8 +229,9 @@ export async function getAllUpcomingSessions(trainerId:string) {
     const supabase=await createClient()
 
     const { data,error } = await supabase.from('sessions')
-        .select(`id, start_time, end_time, session_type, price, capacity_available,status`)
+        .select(`id, start_time, end_time, session_type, price, capacity_available,capacity_total,status`)
         .eq('trainer_id', trainerId)
+        .eq('status', 'scheduled')
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true });
 
@@ -263,8 +264,26 @@ export async function deleteSession(sessionId:number,trainerId:string) {
     return data;
 }
 
-export async function editSession(sessionId:number,trainerId:string, startTime: string, endTime: string, sessionType: string, price: number,capacity: number) {
-    if(!sessionId || !trainerId || !startTime || !endTime || !sessionType || !price || !capacity) return null
+export async function editSession(sessionId:number,trainerId:string, startTime: string, endTime: string, sessionType: string, price: string,capacity_total: string) {
+    if (!sessionId || !trainerId) return null;
 
     const supabase=await createClient();
+    const{data,error}=await supabase
+        .from('sessions')
+        .update({
+            start_time: startTime,
+            end_time: endTime,
+            session_type: sessionType,
+            price: parseFloat(price),
+            capacity_total: parseInt(capacity_total),
+        })
+        .eq('id',sessionId)
+        .eq('trainer_id',trainerId)
+
+    if(error){
+        console.log("Error updating sessions",error)
+        return null
+    }
+
+    return data
 }

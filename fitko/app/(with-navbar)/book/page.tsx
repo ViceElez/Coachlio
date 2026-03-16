@@ -21,4 +21,4 @@ export default async function BookPage() {
     return <>
         <BookClient profile={profile} availableSessions={clientSessions ?? []} />
     </>
-}
+}//fix kad se klikne confirm edit da bude na sredini, i implementiraj logiku
