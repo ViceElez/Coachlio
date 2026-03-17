@@ -15,7 +15,7 @@ export const NavigationBar = () => {
                     <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shrink-0">
                         <span className="text-white font-bold text-lg">F</span>
                     </div>
-                    <p className="font-bold text-gray-900 leading-tight">Fittonia</p>
+                    <p className="font-bold text-gray-900 leading-tight">Coachlio</p>
                 </div>
 
                 <div className="hidden md:flex items-center gap-6">

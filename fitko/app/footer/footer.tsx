@@ -11,7 +11,7 @@ export const Footer = () => {
                         <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shrink-0">
                             <span className="text-white font-bold text-lg">F</span>
                         </div>
-                        <p className="font-bold text-gray-900 text-lg">Fittonia</p>
+                        <p className="font-bold text-gray-900 text-lg">Coachlio</p>
                     </div>
                     <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
                         Your personal fitness companion. Train smarter, recover better, and reach your goals.
@@ -60,7 +60,7 @@ export const Footer = () => {
             </div>
 
             <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
-                <p className="text-xs text-gray-400">© {new Date().getFullYear()} Fittonia. All rights reserved.</p>
+                <p className="text-xs text-gray-400">© {new Date().getFullYear()} Coachlio. All rights reserved.</p>
                 <p className="text-xs text-gray-400">Made with <span className="text-emerald-500">♥</span> for a healthier you.</p>
             </div>
         </footer>

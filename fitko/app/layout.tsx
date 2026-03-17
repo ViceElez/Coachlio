@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fittonia",
+  title: "Coachlio",
   description: "A simple, open-source, self-hosted fitness tracker built with Next.js.",
 };
 
