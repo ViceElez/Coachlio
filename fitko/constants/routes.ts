@@ -15,8 +15,10 @@ export const routes:Routes={
     MESSAGES: '/messages',
     HELP: '/help',
     CONTACT: '/contact',
-    PRIVACY: '/privacy',
-    TERMS: '/terms',
+    PRIVACY_POLICY: '/privacy-policy',
+    TERMS_OF_SERVICE: '/terms-of-service',
+    PRIVACY: '/privacy-policy',
+    TERMS: '/terms-of-service',
     ERROR: '/error',
     NO_PAGE_FOUND: '*'
 }

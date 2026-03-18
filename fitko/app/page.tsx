@@ -121,16 +121,16 @@ const footerColumns = [
     {
         heading: "Support",
         links: [
-            { label: "Help Center", href: "#" },
-            { label: "Contact", href: "#" },
-            { label: "Privacy", href: "#" },
+            { label: "Help Center", href: routes.HELP },
+            { label: "Contact", href: routes.CONTACT },
+            { label: "Privacy", href: routes.PRIVACY_POLICY },
         ],
     },
 ];
 
 const footerLegalLinks = [
-    { label: "Terms", href: "#" },
-    { label: "Privacy", href: "#" },
+    { label: "Terms", href: routes.TERMS_OF_SERVICE },
+    { label: "Privacy", href: routes.PRIVACY_POLICY },
     { label: "Cookies", href: "#" },
 ];
 
@@ -187,7 +187,6 @@ export default function LandingPage() {
                             </button>
                         </div>
 
-                        {/* Trust Indicators */}
                         <div className="mt-8 md:mt-12 flex flex-col items-center gap-3 md:gap-4">
                             <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-muted-foreground">
                                 <div className="flex -space-x-2">
@@ -254,7 +253,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-10 md:mb-16">
                         <h2 className="text-2xl md:text-4xl font-bold mb-3 md:mb-4">
-                            Why Choose FitCoach?
+                            Why Choose Coachlio?
                         </h2>
                     </div>
 

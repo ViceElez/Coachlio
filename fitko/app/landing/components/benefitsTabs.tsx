@@ -27,7 +27,7 @@ export const BenefitsTabs=({text,onClick,array, icon:Icon}:{
                 onClick={onClick}
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 md:h-11 px-6 w-full mt-6"
             >
-                Start as Trainer
+                Start Now For Free
             </button>
         </div>
     )
