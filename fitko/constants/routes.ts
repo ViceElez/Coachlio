@@ -20,5 +20,7 @@ export const routes:Routes={
     PRIVACY: '/privacy-policy',
     TERMS: '/terms-of-service',
     ERROR: '/error',
+    PAYMENT_SUCCESS:'/payment-success',
+    PAYMENT_FAILED:'payment-failed',
     NO_PAGE_FOUND: '*'
 }

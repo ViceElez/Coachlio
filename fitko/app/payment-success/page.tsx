@@ -2,25 +2,21 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { routes } from "@/constants/routes"
 import Stripe from "stripe"
-import {updateBookingStatus} from "@/lib/bookSession";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
 })
 
 export default async function PaymentSuccess({searchParams,}: {
-    searchParams: Promise<{ payment_intent: string }>
+    searchParams: Promise<{ payment_intent: string; redirect_status: string }>
 }) {
-    const { payment_intent } = await searchParams
+    const { payment_intent, redirect_status } = await searchParams
 
+    if (redirect_status === "failed") redirect(routes.PAYMENT_FAILED)
     if (!payment_intent) redirect("/")
 
     const intent = await stripe.paymentIntents.retrieve(payment_intent)
-
-    if (intent.status === "succeeded")
-        await updateBookingStatus(intent.id)
-    else
-        redirect("/")
+    if (intent.status !== "succeeded") redirect(routes.PAYMENT_FAILED)
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-16">
@@ -31,12 +27,10 @@ export default async function PaymentSuccess({searchParams,}: {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-
                     <h1 className="text-2xl font-bold text-gray-900">Payment Confirmed</h1>
                     <p className="text-gray-500 mt-3 leading-relaxed">
-                        Thank you! Your session has been successfully booked. A confirmation will be sent to your account.
+                        Thank you! Your session has been successfully booked.
                     </p>
-
                     <div className="border-t border-gray-100 mt-8 pt-8 flex flex-col gap-3">
                         <Link
                             href={routes.DASHBOARD}

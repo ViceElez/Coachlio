@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation"
 import { cancelBookingSession } from "@/lib/bookSession"
 import { routes } from "@/constants/routes"
 
-const CheckoutPage = ({ amount, clientSecret }: {
+const CheckoutPage = ({ amount, clientSecret,bookingId }: {
     amount: number
     clientSecret: string
+    bookingId: number
 }) => {
     const stripe = useStripe()
     const elements = useElements()
@@ -48,7 +49,7 @@ const CheckoutPage = ({ amount, clientSecret }: {
     const handleCancel = async () => {
         setCancelling(true)
         try {
-            await cancelBookingSession(clientSecret)
+            await cancelBookingSession(bookingId)
         } catch (err) {
             console.error("Cancel error:", err)
         } finally {

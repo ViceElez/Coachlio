@@ -29,7 +29,6 @@ export async function reserveSession(sessionId: number) {
 
     const { data: booking, error: rpcError } = await supabase.rpc("reserve_session", {
         p_session_id: sessionId,
-        p_client_secret: paymentIntent.client_secret,
         p_payment_intent_id: paymentIntent.id,
     })
 
@@ -38,13 +37,15 @@ export async function reserveSession(sessionId: number) {
         throw new Error(rpcError.message)
     }
 
-    return booking
+    return {...booking, clientSecret:paymentIntent.client_secret}
 }
 
 export async function getBookingSession(bookingId: number) {
     const supabase = await createClient()
 
-    const { data: booking, error } = await supabase.from('bookings').select(`id,stripe_client_secret,stripe_payment_intent_id, sessions!inner(id,price,trainer:users (first_name,last_name))`)
+    const { data: booking, error } = await supabase
+        .from('bookings')
+        .select(`id,stripe_payment_intent_id, sessions!inner(id,price,trainer:users (first_name,last_name))`)
         .eq("id", bookingId)
         .single()
 
@@ -58,6 +59,7 @@ export async function getBookingSession(bookingId: number) {
         throw new Error("Booking not found.")
     }
 
+    const intent=await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id)
     const session = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions
 
     if (!session) {
@@ -69,6 +71,7 @@ export async function getBookingSession(bookingId: number) {
 
     return {
         ...booking,
+        clientSecret:intent.client_secret,
         sessions: {
             ...session,
             trainer,
@@ -93,13 +96,13 @@ export async function updateBookingStatus(intentId: string) {
     return data
 }
 
-export async function cancelBookingSession(clientSecret: string) {
+export async function cancelBookingSession(bookingId: number) {
     const supabase = await createClient()
 
     const { data: booking, error: fetchError } = await supabase
         .from("bookings")
         .select("id, stripe_payment_intent_id, status")
-        .eq("stripe_client_secret", clientSecret)
+        .eq("id", bookingId)
         .single()
 
     if (fetchError || !booking) {
@@ -133,4 +136,16 @@ export async function cancelBookingSession(clientSecret: string) {
     })
 
     if (rpcError) throw new Error(rpcError.message)
+}
+
+export async function handleFailedPayment(paymentIntentId: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .eq("status", "reserved")
+
+    if (error) throw new Error("Unable to update booking status.")
 }

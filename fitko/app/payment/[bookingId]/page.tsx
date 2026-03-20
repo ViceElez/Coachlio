@@ -18,7 +18,7 @@ export default async function PaymentPage({params,}: {
         )
     }
 
-    if (!booking.stripe_client_secret) {
+    if (!booking.clientSecret) {
         return (
             <main className="max-w-2xl mx-auto p-6">
                 <h1 className="text-xl font-semibold mb-4">Payment unavailable</h1>
@@ -32,7 +32,8 @@ export default async function PaymentPage({params,}: {
     return (
         <PaymentClient
             amount={session.price}
-            clientSecret={booking.stripe_client_secret}
+            clientSecret={booking.clientSecret}
+            bookingId={Number(bookingId)}
         />
     )
 }
