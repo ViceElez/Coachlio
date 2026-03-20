@@ -3,6 +3,7 @@
 import {createClient} from "@/utils/supabase/server";
 import Stripe from "stripe";
 import {convertToSubcurrency} from "@/lib/helper/convertToSubcurrency";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
@@ -80,7 +81,10 @@ export async function getBookingSession(bookingId: number) {
 }
 
 export async function updateBookingStatus(intentId: string) {
-    const supabase = await createClient()
+    const supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const { data, error } = await supabase
         .from("bookings")
@@ -139,7 +143,10 @@ export async function cancelBookingSession(bookingId: number) {
 }
 
 export async function handleFailedPayment(paymentIntentId: string) {
-    const supabase = await createClient()
+    const supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const { error } = await supabase
         .from("bookings")
