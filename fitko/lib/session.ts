@@ -276,6 +276,7 @@ export async function editSession(sessionId:number,trainerId:string, startTime: 
             session_type: sessionType,
             price: parseFloat(price),
             capacity_total: parseInt(capacity_total),
+            capacity_available: parseInt(capacity_total),
         })
         .eq('id',sessionId)
         .eq('trainer_id',trainerId)
@@ -286,4 +287,22 @@ export async function editSession(sessionId:number,trainerId:string, startTime: 
     }
 
     return data
+}
+
+export async function checkIfSessionIsBooked(sessionId:number,trainerId:string) {
+    if(!sessionId || !trainerId) return null
+
+    const supabase=await createClient()
+    const { count, error } = await supabase
+        .from('bookings')
+        .select('id', { count: 'exact', head: true })
+        .eq('session_id', sessionId)
+        .in('status', ['reserved', 'paid']);
+
+    if (error) {
+        console.error("Error checking if session is booked:", error);
+        return null;
+    }
+
+    return (count ?? 0) > 0;
 }

@@ -96,7 +96,6 @@ export default function DashboardTrainer({
                 ))}
             </div>
 
-            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Revenue Trend */}
                 <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
@@ -131,7 +130,6 @@ export default function DashboardTrainer({
                     </p>
                 </div>
 
-                {/* Weekly Sessions */}
                 <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
                     <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Weekly Sessions</h2>
                     <ResponsiveContainer width="100%" height={220}>

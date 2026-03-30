@@ -18,6 +18,12 @@ import {formatDate, formatTime, getDuration, localDatetimeToISOString} from "@/l
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
+function toDatetimeLocalValue(date: Date) {
+    // datetime-local expects: YYYY-MM-DDTHH:mm in user's local time
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export default function CreateSession({
     profile,
     onCloseAction,
@@ -35,6 +41,13 @@ export default function CreateSession({
     const [price, setPrice] = useState("");
 
     const duration = startTime && endTime ? getDuration(startTime, endTime) : null;
+
+    const nowMin = (() => {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() - 2);
+        d.setSeconds(0, 0);
+        return toDatetimeLocalValue(d);
+    })();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,7 +72,7 @@ export default function CreateSession({
             }
 
             setSubmitted(true);
-        } catch (err) {
+        } catch {
             setError("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
@@ -67,7 +80,14 @@ export default function CreateSession({
     };
 
     const validateTimes = (start: string, end: string) => {
+        const startInput = document.getElementsByName("start_time")[0] as HTMLInputElement;
         const endInput = document.getElementsByName("end_time")[0] as HTMLInputElement;
+
+        if (start && new Date(start) < new Date(nowMin)) {
+            startInput.setCustomValidity("Start time cannot be in the past.");
+        } else {
+            startInput.setCustomValidity("");
+        }
 
         if (start && end && new Date(start) >= new Date(end)) {
             endInput.setCustomValidity("End time must be after start time.");
@@ -78,33 +98,37 @@ export default function CreateSession({
 
     if (submitted) {
         return (
-            <div className="bg-white rounded-2xl p-8 sm:p-10 flex flex-col items-center gap-4 max-w-md w-full text-center">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900">Session Created!</h2>
-                <p className="text-sm text-gray-500">Your session has been successfully created and is now visible to clients.</p>
+            <div className="bg-white rounded-2xl p-8 sm:p-10 w-full">
+                <div className="mx-auto w-full max-w-md text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">Session Created!</h2>
+                    <p className="text-sm text-gray-500">
+                        Your session has been successfully created and is now visible to clients.
+                    </p>
 
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-                    <button
-                        onClick={() => {
-                            setSubmitted(false);
-                            setStartTime("");
-                            setEndTime("");
-                            setCapacity("");
-                            setPrice("");
-                        }}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
-                    >
-                        Create Another
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => onCloseAction?.()}
-                        className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
-                    >
-                        Close
-                    </button>
+                    <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                        <button
+                            onClick={() => {
+                                setSubmitted(false);
+                                setStartTime("");
+                                setEndTime("");
+                                setCapacity("");
+                                setPrice("");
+                            }}
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+                        >
+                            Create Another
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onCloseAction?.()}
+                            className="border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -142,6 +166,13 @@ export default function CreateSession({
                             </div>
                         )}
 
+                        {(startTime && new Date(startTime) < new Date(nowMin)) && (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                Start time cannot be in the past.
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                                 <Tag className="w-4 h-4 text-gray-400" />
@@ -175,6 +206,7 @@ export default function CreateSession({
                                     name="start_time"
                                     type="datetime-local"
                                     required
+                                    min={nowMin}
                                     value={startTime}
                                     onChange={(e) => {
                                         setStartTime(e.target.value);

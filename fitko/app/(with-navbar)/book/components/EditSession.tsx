@@ -18,6 +18,11 @@ import {editSession} from "@/lib/session";
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
+function toDatetimeLocalValue(date: Date) {
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 function isoToDatetimeLocal(iso: string) {
 	if (!iso) return "";
 	const d = new Date(iso);
@@ -51,9 +56,23 @@ export default function EditSession({
 
 	const duration = startTime && endTime ? getDuration(startTime, endTime) : null;
 
+	const nowMin = (() => {
+		const d = new Date();
+		d.setMinutes(d.getMinutes() - 2);
+		d.setSeconds(0, 0);
+		return toDatetimeLocalValue(d);
+	})();
+
 	const validateTimes = (start: string, end: string) => {
+		const startInput = document.getElementsByName("edit_start_time")[0] as HTMLInputElement | undefined;
 		const endInput = document.getElementsByName("edit_end_time")[0] as HTMLInputElement | undefined;
-		if (!endInput) return;
+		if (!startInput || !endInput) return;
+
+		if (start && new Date(start) < new Date(nowMin)) {
+			startInput.setCustomValidity("Start time cannot be in the past.");
+		} else {
+			startInput.setCustomValidity("");
+		}
 
 		if (start && end && new Date(start) >= new Date(end)) {
 			endInput.setCustomValidity("End time must be after start time.");
@@ -130,6 +149,12 @@ export default function EditSession({
 								{error}
 							</div>
 						)}
+						{startTime && new Date(startTime) < new Date(nowMin) && (
+							<div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+								<AlertCircle className="w-4 h-4 shrink-0" />
+											Start time cannot be in the past.
+							</div>
+						)}
 
 						<div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
 							<p className="text-sm font-semibold text-gray-700">Current</p>
@@ -175,6 +200,7 @@ export default function EditSession({
 									name="edit_start_time"
 									type="datetime-local"
 									required
+									min={nowMin}
 									value={startTime}
 									onChange={(e) => {
 										setStartTime(e.target.value);

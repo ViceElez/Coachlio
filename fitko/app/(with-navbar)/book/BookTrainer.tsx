@@ -6,7 +6,7 @@ import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { Calendar, Clock, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import CreateSession from "./components/CreateSession";
-import {deleteSession} from "@/lib/session";
+import {checkIfSessionIsBooked, deleteSession} from "@/lib/session";
 import EditSession from "./components/EditSession";
 import DeleteSession from "./components/DeleteSession";
 
@@ -18,6 +18,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [bookedMap, setBookedMap] = useState<Record<number, boolean>>({});
 
     useEffect(() => {
         if (!createOpen && !editOpen && !deleteOpen) return;
@@ -59,7 +60,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
             setSessions(prev => prev.filter(session => session.id !== sessionId));
             setDeleteOpen(false);
             setSelectedSession(null);
-        }catch(e){
+        }catch{
             return
         } finally {
             setDeleteLoading(false);
@@ -68,6 +69,34 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
 
     const upcomingSessions = [...sessions]
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadBookedFlags() {
+            const entries = await Promise.all(
+                upcomingSessions.map(async (s) => {
+                    try {
+                        const isBooked = await checkIfSessionIsBooked(s.id, profile.id);
+                        return [s.id, Boolean(isBooked)] as const;
+                    } catch {
+                        return [s.id, false] as const;
+                    }
+                })
+            );
+
+            if (cancelled) return;
+
+            const next: Record<number, boolean> = {};
+            for (const [id, isBooked] of entries) next[id] = isBooked;
+            setBookedMap(next);
+        }
+
+        void loadBookedFlags();
+        return () => {
+            cancelled = true;
+        };
+    }, [profile.id, sessions.map((s) => s.id).join(",")]);
 
     const trainerName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ");
 
@@ -107,7 +136,7 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                             onClick={() => setCreateOpen(false)}
                         />
 
-                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
+                        <div className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl bg-white">
                             <CreateSession profile={profile} onCloseAction={() => setCreateOpen(false)} />
                         </div>
                     </div>
@@ -153,6 +182,8 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                     ? "bg-emerald-500 text-white"
                                     : "bg-gray-100 text-gray-700";
 
+                            const isBooked = bookedMap[session.id] ?? false;
+
                             return (
                                 <div
                                     key={session.id}
@@ -167,11 +198,18 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                                 {getDuration(session.start_time, session.end_time)}
                                             </p>
                                         </div>
-                                        <span
-                                            className={`text-xs font-semibold px-3 py-0.5 rounded-full capitalize shrink-0 ${typeColor}`}
-                                        >
-                                            {session.session_type === "1on1" ? "1-on-1" : "Group"}
-                                        </span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {isBooked && (
+                                                <span className="text-xs font-semibold px-3 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                                    Booked
+                                                </span>
+                                            )}
+                                            <span
+                                                className={`text-xs font-semibold px-3 py-0.5 rounded-full capitalize ${typeColor}`}
+                                            >
+                                                {session.session_type === "1on1" ? "1-on-1" : "Group"}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-600">
@@ -196,10 +234,16 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
+                                                if (isBooked) return;
                                                 setSelectedSession(session);
                                                 setEditOpen(true);
                                             }}
-                                            className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
+                                            disabled={isBooked}
+                                            className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border transition-colors ${
+                                                isBooked
+                                                    ? "border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed"
+                                                    : "border-gray-200 hover:bg-gray-50"
+                                            }`}
                                         >
                                             <Pencil className="w-4 h-4" />
                                             Edit
@@ -207,15 +251,27 @@ export default function BookTrainer({ profile,availableSessions }: { profile: Cl
                                         <button
                                             type="button"
                                             onClick={() => {
+                                                if (isBooked) return;
                                                 setSelectedSession(session);
                                                 setDeleteOpen(true);
                                             }}
-                                            className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                                            disabled={isBooked}
+                                            className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl border transition-colors ${
+                                                isBooked
+                                                    ? "border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed"
+                                                    : "border-red-200 text-red-600 hover:bg-red-50"
+                                            }`}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                             Delete
                                         </button>
                                     </div>
+
+                                    {isBooked && (
+                                        <p className="text-xs text-gray-400 -mt-2">
+                                            This session already has bookings, so it can’t be edited or deleted.
+                                        </p>
+                                    )}
                                 </div>
                             );
                         })}
