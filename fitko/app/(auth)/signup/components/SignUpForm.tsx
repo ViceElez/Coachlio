@@ -19,6 +19,12 @@ import { routes } from "@/constants/routes";
 export function SignUpForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [successMessage, setSuccessMessage] = useState("");
+    const [values, setValues] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+    });
     const router = useRouter();
 
     async function handleSubmit(formData: FormData) {
@@ -30,6 +36,13 @@ export function SignUpForm() {
 
             if (result.errors) {
                 setErrors(result.errors);
+                setValues((prev) => ({
+                    firstName: result.errors.firstName ? "" : prev.firstName,
+                    lastName: result.errors.lastName ? "" : prev.lastName,
+                    email: result.errors.email ? "" : prev.email,
+                    password: result.errors.password ? "" : prev.password,
+                }));
+
                 if (result.errors.general?.includes("Invalid session")) {
                     setTimeout(() => {
                         router.push("/invite-code?redirect_to=signup");
@@ -39,6 +52,7 @@ export function SignUpForm() {
                 setSuccessMessage(
                     "Account created successfully! Please check your email to verify your account."
                 );
+                setValues({ firstName: "", lastName: "", email: "", password: "" });
             }
         } catch (err) {
             console.error(err);
@@ -71,6 +85,10 @@ export function SignUpForm() {
                                     id="first-name"
                                     placeholder="Max"
                                     required
+                                    value={values.firstName}
+                                    onChange={(e) =>
+                                        setValues((p) => ({ ...p, firstName: e.target.value }))
+                                    }
                                 />
                                 {errors.firstName && (
                                     <p className="text-red-500 text-sm">{errors.firstName}</p>
@@ -83,6 +101,10 @@ export function SignUpForm() {
                                     id="last-name"
                                     placeholder="Robinson"
                                     required
+                                    value={values.lastName}
+                                    onChange={(e) =>
+                                        setValues((p) => ({ ...p, lastName: e.target.value }))
+                                    }
                                 />
                                 {errors.lastName && (
                                     <p className="text-red-500 text-sm">{errors.lastName}</p>
@@ -97,6 +119,10 @@ export function SignUpForm() {
                                 type="email"
                                 placeholder="m@example.com"
                                 required
+                                value={values.email}
+                                onChange={(e) =>
+                                    setValues((p) => ({ ...p, email: e.target.value }))
+                                }
                             />
                             {errors.email && (
                                 <p className="text-red-500 text-sm">{errors.email}</p>
@@ -104,7 +130,15 @@ export function SignUpForm() {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input name="password" id="password" type="password" />
+                            <Input
+                                name="password"
+                                id="password"
+                                type="password"
+                                value={values.password}
+                                onChange={(e) =>
+                                    setValues((p) => ({ ...p, password: e.target.value }))
+                                }
+                            />
                             {errors.password && (
                                 <p className="text-red-500 text-sm">{errors.password}</p>
                             )}
