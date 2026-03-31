@@ -15,11 +15,16 @@ export async function reserveSession(sessionId: number) {
 
     const { data: session, error: sessionError } = await supabase
         .from("sessions")
-        .select("price")
+        .select("price, capacity_available")
         .eq("id", sessionId)
         .single()
 
     if (sessionError || !session) throw new Error("Session not found")
+
+
+    if (typeof session.capacity_available === "number" && session.capacity_available <= 0) {
+        throw new Error("Session is full. Please refresh the page and choose another time.")
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
         amount: convertToSubcurrency(session.price),

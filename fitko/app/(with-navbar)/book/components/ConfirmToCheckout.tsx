@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { X, Calendar, Clock, Timer, Users, DollarSign, User } from "lucide-react";
+import {X, Calendar, Clock, Timer, Users, DollarSign, User, AlertCircle, Loader2} from "lucide-react";
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { ConfirmToCheckoutProps } from "@/constants/interface/ConfirmToCheckoutProps";
 import { routes } from "@/constants/routes";
@@ -11,6 +11,8 @@ import {reserveSession} from "@/lib/bookSession";
 
 export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) => {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -44,12 +46,18 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
             : "bg-gray-100 text-gray-700";
 
     const handleConfirm = async () => {
+        if (loading) return;
+
+        setLoading(true);
+        setError(null);
         try {
             const booking = await reserveSession(session.id)
             router.push(`${routes.CHECKOUT}/${booking.id}`)
         } catch (e: any) {
             console.error(e)
-            alert(e.message)
+            setError(e?.message ?? "Unable to continue to checkout. Please try again.")
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -79,6 +87,13 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                 </div>
 
                 <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4 overflow-y-auto flex-1">
+                    {error && (
+                        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
@@ -149,9 +164,17 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                     </button>
                     <button
                         onClick={() => {handleConfirm()}}
-                        className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold transition-colors"
+                        disabled={loading}
+                        className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                     >
-                        Confirm Booking
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Checking…
+                            </>
+                        ) : (
+                            "Confirm Booking"
+                        )}
                     </button>
                 </div>
             </div>

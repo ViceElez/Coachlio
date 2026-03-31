@@ -18,8 +18,9 @@ import {formatDate, formatTime, getDuration, localDatetimeToISOString} from "@/l
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
+const MAX_SESSION_PRICE = 100000;
+
 function toDatetimeLocalValue(date: Date) {
-    // datetime-local expects: YYYY-MM-DDTHH:mm in user's local time
     const pad = (n: number) => String(n).padStart(2, "0");
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
@@ -39,6 +40,9 @@ export default function CreateSession({
     const [endTime, setEndTime] = useState("");
     const [capacity, setCapacity] = useState("");
     const [price, setPrice] = useState("");
+
+    const parsedPrice = price ? Number(price) : NaN;
+    const isPriceTooHigh = Number.isFinite(parsedPrice) && parsedPrice > MAX_SESSION_PRICE;
 
     const duration = startTime && endTime ? getDuration(startTime, endTime) : null;
 
@@ -93,6 +97,20 @@ export default function CreateSession({
             endInput.setCustomValidity("End time must be after start time.");
         } else {
             endInput.setCustomValidity("");
+        }
+    };
+
+    const validatePrice = (value: string) => {
+        const priceInput = document.getElementsByName("price")[0] as HTMLInputElement;
+        if (!priceInput) return;
+
+        const num = Number(value);
+        if (Number.isFinite(num) && num > MAX_SESSION_PRICE) {
+            priceInput.setCustomValidity(
+                `Price cannot exceed $${MAX_SESSION_PRICE.toLocaleString()}. Contact support to allow higher-priced sessions.`
+            );
+        } else {
+            priceInput.setCustomValidity("");
         }
     };
 
@@ -163,6 +181,13 @@ export default function CreateSession({
                             <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
                                 <AlertCircle className="w-4 h-4 shrink-0" />
                                 {error}
+                            </div>
+                        )}
+
+                        {isPriceTooHigh && (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                Price is too high. Sessions over ${MAX_SESSION_PRICE.toLocaleString()} require approval — please contact support.
                             </div>
                         )}
 
@@ -265,7 +290,10 @@ export default function CreateSession({
                                     step={0.01}
                                     required
                                     value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
+                                    onChange={(e) => {
+                                        setPrice(e.target.value);
+                                        validatePrice(e.target.value);
+                                    }}
                                     placeholder="e.g. 60"
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                                 />
@@ -274,7 +302,7 @@ export default function CreateSession({
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || isPriceTooHigh}
                             className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
                         >
                             {loading ? (
