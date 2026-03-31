@@ -2,7 +2,7 @@ import {getProfile, getUserRole} from "@/lib/getProfile";
 import {redirect} from "next/navigation";
 import BookClient from "./BookClient";
 import {routes} from "@/constants/routes";
-import {getAllUpcomingSessions, getClientSessions, getClientUpcomingSessions} from "@/lib/session";
+import {getAllUpcomingSessions, getClientSessions} from "@/lib/session";
 import BookTrainer from "./BookTrainer";
 
 export default async function BookPage() {

@@ -20,6 +20,7 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
     const [sortOption, setSortOption] = useState("Most Capacity");
     const [search, setSearch] = useState("");
     const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
+    const [openingSessionId, setOpeningSessionId] = useState<number | null>(null);
 
     const filtered = availableSessions
         .filter((s) => {
@@ -49,7 +50,10 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
             {selectedSession && (
                 <ConfirmToCheckout
                     session={selectedSession}
-                    onClose={() => setSelectedSession(null)}
+                    onClose={() => {
+                        setSelectedSession(null);
+                        setOpeningSessionId(null);
+                    }}
                 />
             )}
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -144,8 +148,13 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                                         <p className="text-xs text-gray-400 mt-0.5">{getDuration(session.start_time, session.end_time)}</p>
                                     </div>
                                     <button
-                                        onClick={() => setSelectedSession(session)}
-                                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors shrink-0"
+                                        disabled={openingSessionId === session.id}
+                                        onClick={() => {
+                                            if (openingSessionId != null) return;
+                                            setOpeningSessionId(session.id);
+                                            setSelectedSession(session);
+                                        }}
+                                        className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors shrink-0"
                                     >
                                         Book Now
                                     </button>
