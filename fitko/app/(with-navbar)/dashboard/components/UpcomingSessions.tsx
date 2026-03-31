@@ -4,6 +4,8 @@ import {formatDate, formatTime} from "@/lib/helper/getTime";
 
 export const UpcomingSessions = (session: BookingProps) => {
 
+    const sessionTypeLabel = session.sessions.session_type === "group" ? "Group Session" : "1-on-1 Session";
+
     return (
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 hover:border-emerald-100 hover:bg-emerald-50/30 transition-colors">
             <div className="flex items-center gap-3 min-w-0">
@@ -12,7 +14,7 @@ export const UpcomingSessions = (session: BookingProps) => {
                 </div>
                 <div className="min-w-0">
                     <p className="font-bold text-gray-900 text-sm sm:text-lg truncate">{session.sessions.trainer?.first_name} {session.sessions.trainer?.last_name}</p>
-                    <p className="text-xs sm:text-sm text-emerald-500 font-medium">Personal Training</p>
+                    <p className="text-xs sm:text-sm text-emerald-500 font-medium">{sessionTypeLabel}</p>
                     <p className="text-xs sm:text-sm text-amber-500 mt-1 truncate">{formatDate(session.sessions.start_time)}, {formatTime(session.sessions.start_time)}</p>
                 </div>
             </div>
