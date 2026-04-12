@@ -1,6 +1,7 @@
 "use server";
 
 import {createClient} from "@/utils/supabase/server";
+import { getEarliestSessionStart } from "@/lib/helper/getTime";
 
 export async function getTrainerTodaySessions(trainerId: string) {
     if (!trainerId) return null;
@@ -168,6 +169,22 @@ export async function getClientUpcomingSessions(clientId:string) {
 export async function createSession(trainerId: string, startTime: string, endTime: string, sessionType: string, price: number,capacity: number) {
 
     if(!trainerId||!startTime||!endTime||!sessionType||!price||!capacity) return null
+
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime())) return null;
+
+    const earliest = getEarliestSessionStart(new Date());
+    const GRACE_MS = 90 * 1000;
+
+    if (start.getTime() < earliest.getTime() - GRACE_MS) {
+        console.error(
+            `Start time too soon. start=${start.toISOString()} earliest=${earliest.toISOString()}`
+        );
+        return null;
+    }
+
+    if (end.getTime() <= start.getTime()) return null
 
     const supabase = await createClient();
 

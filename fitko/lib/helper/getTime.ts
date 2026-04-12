@@ -40,3 +40,17 @@ export function localDatetimeToISOString(datetimeLocal: string) {
     const d = new Date(year, month - 1, day, hour, minute);
     return d.toISOString();
 }
+
+function toDatetimeLocalValue(date: Date) {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function getEarliestSessionStart(now: Date = new Date()) {
+    return new Date(now.getTime() + 60 * 60 * 1000);
+}
+
+export function earliestSessionStartDatetimeLocal(now: Date = new Date()) {
+    return toDatetimeLocalValue(getEarliestSessionStart(now));
+}
+

@@ -14,16 +14,17 @@ import {
 } from "lucide-react";
 import { createSession } from "@/lib/session";
 import { ClientProfile } from "@/constants/interface/clientProfile";
-import {formatDate, formatTime, getDuration, localDatetimeToISOString} from "@/lib/helper/getTime";
+import {
+    earliestSessionStartDatetimeLocal,
+    formatDate,
+    formatTime,
+    getDuration,
+    localDatetimeToISOString,
+} from "@/lib/helper/getTime";
 
 const SESSION_TYPES = ["1on1", "group"] as const;
 
 const MAX_SESSION_PRICE = 100000;
-
-function toDatetimeLocalValue(date: Date) {
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 export default function CreateSession({
     profile,
@@ -46,12 +47,7 @@ export default function CreateSession({
 
     const duration = startTime && endTime ? getDuration(startTime, endTime) : null;
 
-    const nowMin = (() => {
-        const d = new Date();
-        d.setMinutes(d.getMinutes() - 2);
-        d.setSeconds(0, 0);
-        return toDatetimeLocalValue(d);
-    })();
+    const nowMin = earliestSessionStartDatetimeLocal();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -88,7 +84,9 @@ export default function CreateSession({
         const endInput = document.getElementsByName("end_time")[0] as HTMLInputElement;
 
         if (start && new Date(start) < new Date(nowMin)) {
-            startInput.setCustomValidity("Start time cannot be in the past.");
+            startInput.setCustomValidity(
+                `Start time must be at least 1 hour from now. Earliest: ${formatTime(nowMin)}.`
+            );
         } else {
             startInput.setCustomValidity("");
         }
@@ -194,7 +192,7 @@ export default function CreateSession({
                         {(startTime && new Date(startTime) < new Date(nowMin)) && (
                             <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
                                 <AlertCircle className="w-4 h-4 shrink-0" />
-                                Start time cannot be in the past.
+                                Start time must be at least 1 hour from now. Earliest: {formatTime(nowMin)}.
                             </div>
                         )}
 
