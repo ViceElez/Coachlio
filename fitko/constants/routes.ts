@@ -6,6 +6,8 @@ export const routes:Routes={
     LOGIN : '/login',
     SIGNUP : '/signup',
     LOGOUT: '/logout',
+    RESETPASSWORD:'/reset-password',
+    ENTERNEWPASSWORD:'/new-password',
     INVITECODE: '/invite-code',
     ACTIVATEACCOUNT: '/activate',
     DASHBOARD: '/dashboard',

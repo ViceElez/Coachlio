@@ -218,3 +218,4 @@ export async function verifyInviteCode(
 
   return { success: true };
 }
+

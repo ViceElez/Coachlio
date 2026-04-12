@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { login } from "@/lib/auth-actions"
 import SignInWithGoogleButton from "@/app/(auth)/signup/components/SignInWithGoogleButton";
+import {routes} from "@/constants/routes";
 
 export function LoginForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -69,7 +70,7 @@ export function LoginForm() {
                         <div className="grid gap-2">
                             <div className="flex items-center">
                                 <Label htmlFor="password">Password</Label>
-                                <Link href="#" className="ml-8 inline-block text-sm underline">
+                                <Link href={routes.RESETPASSWORD} className="ml-8 inline-block text-sm underline">
                                     Forgot your password?
                                 </Link>
                             </div>
