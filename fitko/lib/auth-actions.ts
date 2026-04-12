@@ -99,7 +99,16 @@ export async function signup(formData: FormData) {
         .single();
 
     if (!codeData?.trainer_id) {
-        return { errors: { general: "Invalid session. Please verify your invite code again." } };
+        return { errors: { general: "Invalid session. Please verify your invite code again. Please wait, you will be redirected soon." } };
+    }
+
+    const { count } = await adminSupabase
+        .from("users")
+        .select("id", { count: "exact", head: true })
+        .eq("email", email);
+
+    if (count) {
+        return { errors: { email: "Email is already in use" } };
     }
 
     const { error: authError } = await supabase.auth.signUp({
