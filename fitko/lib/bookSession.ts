@@ -4,6 +4,8 @@ import {createClient} from "@/utils/supabase/server";
 import Stripe from "stripe";
 import {convertToSubcurrency} from "@/lib/helper/convertToSubcurrency";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import {revalidatePath} from "next/cache";
+import {routes} from "@/constants/routes";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
@@ -160,4 +162,39 @@ export async function handleFailedPayment(paymentIntentId: string) {
         .eq("status", "reserved")
 
     if (error) throw new Error("Unable to update booking status.")
+}
+
+export async function handleStripeCancellation(bookingId:number){
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .select("id, status, sessions!inner(price)")
+        .eq("id", bookingId)
+        .eq("client_id", user.id)
+        .single();
+
+    if (bookingError || !booking) return { error: "Booking not found" };
+    if (booking.status === "cancelled") return { error: "Already cancelled" };
+
+    const sessionRow = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions;
+    const price = sessionRow?.price;
+
+    if (typeof price !== "number") {
+        return { error: "Session price not available" };
+    }
+
+    const { error: rpcError } = await supabase.rpc("cancel_booking_and_credit", {
+        p_booking_id: bookingId,
+        p_user_id: user.id,
+        p_amount: price,
+    });
+
+    if (rpcError) return { error: rpcError.message };
+
+    revalidatePath(routes.BOOK);
+    return { success: true };
 }

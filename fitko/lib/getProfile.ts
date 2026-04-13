@@ -1,3 +1,5 @@
+"use server"
+
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { routes } from "@/constants/routes";
@@ -31,5 +33,23 @@ export async function getUserRole(userId: string) {
     }
 
     return userPrivate?.role || null;
+
+}
+
+export async function getUserCredits(userId: string) {
+    const supabase = await createClient();
+
+    const { data:userPrivate,error } = await supabase
+        .from("user_private")
+        .select("credits")
+        .eq("id", userId)
+        .single();
+
+    if(error) {
+        console.error('Error fetching user credits:', error);
+        return null;
+    }
+
+    return userPrivate?.credits || null;
 
 }

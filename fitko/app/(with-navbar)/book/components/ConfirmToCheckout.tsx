@@ -155,7 +155,20 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                     </div>
                 </div>
 
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex gap-3 shrink-0 border-t border-gray-100 pt-4">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 shrink-0 border-t border-gray-100 pt-4">
+                    <div className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs sm:text-sm text-amber-800">
+                        <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                            <p>
+                                By confirming, you acknowledge this booking is <span className="font-semibold">non-refundable</span>. If you
+                                cancel later, you will <span className="font-semibold">not receive a refund</span> and will be issued
+                                <span className="font-semibold"> Fitko credits</span> instead. You <span className="font-semibold">cannot cancel </span>
+                                 within <span className="font-semibold">12 hours</span> of the session start time.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
                     <button
                         onClick={onClose}
                         className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
@@ -176,6 +189,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                             "Confirm Booking"
                         )}
                     </button>
+                    </div>
                 </div>
             </div>
         </div>,

@@ -5,7 +5,7 @@ import LoginButton from "@/components/LoginLogoutButton";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
-export const NavigationBar = () => {
+export const NavigationBar = ({ credits = 0 }: { credits?: number }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
@@ -23,6 +23,9 @@ export const NavigationBar = () => {
                     <NavigationButtons text={"BookSession"} />
                     <NavigationButtons text={"Messages"} />
                     <NavigationButtons text={"Progress"} />
+                    <div className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold border border-emerald-100 whitespace-nowrap">
+                        Credits: {credits}
+                    </div>
                     <LoginButton />
                 </div>
 
@@ -48,6 +51,9 @@ export const NavigationBar = () => {
                     </div>
                     <div onClick={() => setMenuOpen(false)}>
                         <NavigationButtons text={"Progress"} />
+                    </div>
+                    <div className="mt-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-semibold border border-emerald-100">
+                        Credits: {credits}
                     </div>
                     <div className="pt-2 border-t border-gray-100 mt-1">
                         <LoginButton />

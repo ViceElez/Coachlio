@@ -1,10 +1,13 @@
-import {NavigationBar} from "@/app/navigation/NavigationBar";
+import { NavigationBar } from "@/app/navigation/NavigationBar";
 import {Footer} from "@/app/footer/footer";
+import { getProfile, getUserCredits } from "@/lib/getProfile";
 
-export default function Layout({children}:{children: React.ReactNode}){
+export default async function Layout({children}:{children: React.ReactNode}){
+    const profile = await getProfile();
+    const credits = profile?.id ? (await getUserCredits(profile.id)) ?? 0 : 0;
     return(
         <div>
-            <NavigationBar/>
+            <NavigationBar credits={credits} />
             {children}
             <Footer/>
         </div>

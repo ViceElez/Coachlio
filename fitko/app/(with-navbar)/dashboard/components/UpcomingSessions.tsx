@@ -1,8 +1,14 @@
+"use client";
+
 import {Calendar} from "lucide-react";
 import {BookingProps} from "@/constants/interface/BookingProps";
 import {formatDate, formatTime} from "@/lib/helper/getTime";
+import {useState} from "react";
+import CancelSessionModal from "@/app/(with-navbar)/dashboard/components/CancelSessionModal";
+
 
 export const UpcomingSessions = (session: BookingProps) => {
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
     const sessionTypeLabel = session.sessions.session_type === "group" ? "Group Session" : "1-on-1 Session";
 
@@ -18,11 +24,26 @@ export const UpcomingSessions = (session: BookingProps) => {
                     <p className="text-xs sm:text-sm text-amber-500 mt-1 truncate">{formatDate(session.sessions.start_time)}, {formatTime(session.sessions.start_time)}</p>
                 </div>
             </div>
-            <span
-                className="text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full shrink-0 bg-emerald-500 text-white"
-            >
-                {session.sessions.status.charAt(0).toUpperCase() + session.sessions.status.slice(1)}
-            </span>
+            <div className="flex flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-35">
+                <span
+                    className="w-[80%] sm:w-full text-center text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full bg-emerald-500 text-white"
+                >
+                    {session.sessions.status.charAt(0).toUpperCase() + session.sessions.status.slice(1)}
+                </span>
+                <button
+                    type="button"
+                    onClick={() => setIsCancelModalOpen(true)}
+                    className="w-[80%] sm:w-full text-center text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full border border-rose-200 text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors hover:cursor-pointer"
+                >
+                    Cancel
+                </button>
+            </div>
+
+            <CancelSessionModal
+                open={isCancelModalOpen}
+                onOpenChangeAction={setIsCancelModalOpen}
+                bookingId={session.id}
+            />
         </div>
     );
 };
