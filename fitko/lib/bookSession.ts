@@ -164,7 +164,7 @@ export async function handleFailedPayment(paymentIntentId: string) {
     if (error) throw new Error("Unable to update booking status.")
 }
 
-export async function handleStripeCancellation(bookingId:number){
+export async function handleStripeCancellation(bookingId: number) {
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -172,7 +172,7 @@ export async function handleStripeCancellation(bookingId:number){
 
     const { data: booking, error: bookingError } = await supabase
         .from("bookings")
-        .select("id, status, sessions!inner(price)")
+        .select("id, status, sessions!inner(price,start_time)")
         .eq("id", bookingId)
         .eq("client_id", user.id)
         .single();
@@ -182,6 +182,20 @@ export async function handleStripeCancellation(bookingId:number){
 
     const sessionRow = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions;
     const price = sessionRow?.price;
+
+    const startTimeRaw = sessionRow?.start_time;
+    const startTime = startTimeRaw ? new Date(startTimeRaw) : null;
+
+    if (!startTime || Number.isNaN(startTime.getTime())) {
+        return { error: "Session start time not available" };
+    }
+
+    const MS_12_HOURS = 12 * 60 * 60 * 1000;
+    const timeUntilStart = startTime.getTime() - Date.now();
+
+    if (timeUntilStart <= MS_12_HOURS) {
+        return { error: "You cannot cancel within 12 hours of the session start time." };
+    }
 
     if (typeof price !== "number") {
         return { error: "Session price not available" };
