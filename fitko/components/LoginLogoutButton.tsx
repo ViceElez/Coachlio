@@ -23,7 +23,7 @@ const LoginButton = () => {
         return (
             <button
                 onClick={() => { signout(); setUser(null); }}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm font-medium transition-colors"
+                className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm font-medium transition-colors cursor-pointer"
             >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -33,7 +33,7 @@ const LoginButton = () => {
     return (
         <button
             onClick={() => router.push(routes.LOGIN)}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm font-medium transition-colors"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-800 text-sm font-medium transition-colors cursor-pointer"
         >
             <LogIn className="w-4 h-4" />
             Login

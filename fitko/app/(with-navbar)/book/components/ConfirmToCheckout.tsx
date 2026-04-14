@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import {X, Calendar, Clock, Timer, Users, DollarSign, User, AlertCircle, Loader2} from "lucide-react";
+import {X, Calendar, Clock, Timer, Users, DollarSign, User, AlertCircle, Loader2, CheckCircle2} from "lucide-react";
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { ConfirmToCheckoutProps } from "@/constants/interface/ConfirmToCheckoutProps";
 import { routes } from "@/constants/routes";
@@ -13,6 +13,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -46,18 +47,27 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
             : "bg-gray-100 text-gray-700";
 
     const handleConfirm = async () => {
-        if (loading) return;
-
-        setLoading(true);
-        setError(null);
+        if (loading) return
+        setLoading(true)
+        setError(null)
+        setSuccess(null)
         try {
             const booking = await reserveSession(session.id)
+
+            if (booking.fullyPaidWithCredits) {
+                setSuccess("Booking confirmed — paid fully with credits.")
+                await new Promise((r) => setTimeout(r, 1500))
+                onClose()
+                router.refresh()
+                return
+            }
+
             router.push(`${routes.CHECKOUT}/${booking.id}`)
         } catch (e: any) {
             console.error(e)
             setError(e?.message ?? "Unable to continue to checkout. Please try again.")
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
     }
 
@@ -87,6 +97,12 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                 </div>
 
                 <div className="px-4 sm:px-6 py-4 sm:py-5 space-y-4 overflow-y-auto flex-1">
+                    {success && (
+                        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-xl">
+                            <CheckCircle2 className="w-4 h-4 shrink-0" />
+                            <span>{success}</span>
+                        </div>
+                    )}
                     {error && (
                         <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
                             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -171,6 +187,7 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                     <div className="flex gap-3">
                     <button
                         onClick={onClose}
+                        disabled={loading}
                         className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                         Cancel
