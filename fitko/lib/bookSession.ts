@@ -236,3 +236,5 @@ export async function handleStripeCancellation(bookingId: number) {
     revalidatePath(routes.BOOK);
     return { success: true };
 }
+
+
