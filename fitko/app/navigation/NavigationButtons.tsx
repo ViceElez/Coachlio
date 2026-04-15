@@ -3,14 +3,16 @@ import {LayoutDashboard} from "lucide-react";
 import {NavigationButtonsProps} from "@/constants/interface/NavigationButtonsProps";
 import {usePathname} from "next/navigation";
 import Link from "next/link";
+import { routes as appRoutes } from "@/constants/routes";
 
 export const NavigationButtons = ({text}:NavigationButtonsProps) =>{
     const pathname=usePathname()
     const routes: Record<string, string> = {
-        Dashboard: "/dashboard",
-        BookSession: "/book",
-        Messages: "/messages",
-        Progress: "/progress",
+        Dashboard: appRoutes.DASHBOARD,
+        BookSession: appRoutes.BOOK,
+        Messages: appRoutes.MESSAGES,
+        Progress: appRoutes.PROGRESS,
+        Settings: appRoutes.SETTINGS,
     };
 
     const isActive = pathname === routes[text];

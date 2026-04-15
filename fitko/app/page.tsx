@@ -182,7 +182,7 @@ export default function LandingPage() {
                                 onClick={handleGetStarted}
                                 className="inline-flex items-center justify-center rounded-md text-sm md:text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-11 md:h-12 px-6 w-full sm:w-auto"
                             >
-                                Start Free Trial
+                                Start Now
                                 <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2" />
                             </button>
                         </div>

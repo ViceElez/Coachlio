@@ -15,6 +15,7 @@ export const routes:Routes={
     CHECKOUT: '/payment',
     PROGRESS: '/progress',
     MESSAGES: '/messages',
+    SETTINGS:'/settings',
     HELP: '/help',
     CONTACT: '/contact',
     PRIVACY_POLICY: '/privacy-policy',

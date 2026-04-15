@@ -23,6 +23,7 @@ export const NavigationBar = ({ credits = 0 }: { credits?: number }) => {
                     <NavigationButtons text={"BookSession"} />
                     <NavigationButtons text={"Messages"} />
                     <NavigationButtons text={"Progress"} />
+                    <NavigationButtons text={"Settings"} />
                     <div className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold border border-emerald-100 whitespace-nowrap">
                         Credits: {credits}
                     </div>
@@ -30,7 +31,7 @@ export const NavigationBar = ({ credits = 0 }: { credits?: number }) => {
                 </div>
 
                 <button
-                    className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                    className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
                     onClick={() => setMenuOpen((prev) => !prev)}
                     aria-label="Toggle menu"
                 >
@@ -51,6 +52,9 @@ export const NavigationBar = ({ credits = 0 }: { credits?: number }) => {
                     </div>
                     <div onClick={() => setMenuOpen(false)}>
                         <NavigationButtons text={"Progress"} />
+                    </div>
+                    <div onClick={() => setMenuOpen(false)}>
+                        <NavigationButtons text={"Settings"} />
                     </div>
                     <div className="mt-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-semibold border border-emerald-100">
                         Credits: {credits}

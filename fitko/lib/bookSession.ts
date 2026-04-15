@@ -3,7 +3,6 @@
 import {createClient} from "@/utils/supabase/server";
 import Stripe from "stripe";
 import {convertToSubcurrency} from "@/lib/helper/convertToSubcurrency";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import {revalidatePath} from "next/cache";
 import {routes} from "@/constants/routes";
 
@@ -140,28 +139,11 @@ export async function getBookingSession(bookingId: number) {
     }
 }
 
-export async function updateBookingStatus(intentId: string) {
-    const supabase = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    const { data, error } = await supabase
-        .from("bookings")
-        .update({ status: "paid" })
-        .eq("stripe_payment_intent_id", intentId)
-        .single()
-
-    if (error) {
-        console.error("Error updating booking status:", error)
-        throw new Error("Unable to update booking status. Please try again later.")
-    }
-
-    return data
-}
-
 export async function cancelBookingSession(bookingId: number) {
     const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
 
     const { data: booking, error: fetchError } = await supabase
         .from("bookings")
@@ -169,17 +151,19 @@ export async function cancelBookingSession(bookingId: number) {
         .eq("id", bookingId)
         .single()
 
-    if (fetchError || !booking) {
-        throw new Error("Unable to find booking. Please try again later.")
-    }
+    if (fetchError || !booking) throw new Error("Unable to find booking. Please try again later.")
+    if (booking.status === "cancelled") throw new Error("Booking is already cancelled.")
+    if (booking.status === "expired") throw new Error("This booking has already expired.")
+    if (booking.status === "paid") throw new Error("Cannot cancel a booking that has already been paid.")
 
-    if (booking.status === "cancelled") {
-        throw new Error("Booking is already cancelled.")
-    }
+    const { data: creditTx } = await supabase
+        .from("credit_transactions")
+        .select("amount")
+        .eq("booking_id", bookingId)
+        .eq("type", "purchase")
+        .single()
 
-    if (booking.status === "paid") {
-        throw new Error("Cannot cancel a booking that has already been paid.")
-    }
+    const creditsToRestore = creditTx ? Math.abs(creditTx.amount) : 0
 
     if (booking.stripe_payment_intent_id) {
         try {
@@ -195,26 +179,13 @@ export async function cancelBookingSession(bookingId: number) {
         }
     }
 
-    const { error: rpcError } = await supabase.rpc("cancel_booking", {
-        p_booking_id: booking.id,
+    const { error: rpcError } = await supabase.rpc("cancel_booking_and_credit", {
+        p_booking_id: bookingId,
+        p_user_id: user.id,
+        p_amount: creditsToRestore,
     })
 
     if (rpcError) throw new Error(rpcError.message)
-}
-
-export async function handleFailedPayment(paymentIntentId: string) {
-    const supabase = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    const { error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("stripe_payment_intent_id", paymentIntentId)
-        .eq("status", "reserved")
-
-    if (error) throw new Error("Unable to update booking status.")
 }
 
 export async function handleStripeCancellation(bookingId: number) {
