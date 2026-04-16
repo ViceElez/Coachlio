@@ -11,8 +11,8 @@ export default async function SettingsPage() {
     const role = await getUserRole(profile.id);
 
     if (role !== "client") {
-        const trainersClients=await getTrainerClientsAndSessions(profile.id)
-        return <SettingsTrainer profile={profile} />;
+        const trainerClients = await getTrainerClientsAndSessions(profile.id);
+        return <SettingsTrainer {...({ profile, clients: trainerClients } as any)} />;
     }
 
     return <SettingsClient />;

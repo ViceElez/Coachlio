@@ -120,7 +120,7 @@ export async function getTrainerStats(trainerId: string) {
     };
 }
 
-export async function getClientSessions(trainerId:string,clientId:string) {
+export async function getAvailableClientSessions(trainerId:string,clientId:string) {
     if(!trainerId||!clientId) return null
 
     const supabase=await createClient()
@@ -323,3 +323,61 @@ export async function checkIfSessionIsBooked(sessionId:number,trainerId:string) 
 
     return (count ?? 0) > 0;
 }
+
+export async function getClientSessions(
+    trainerId: string,
+    clientIds: string[],
+    statuses: string[] = ["scheduled", "completed"]
+) {
+    if (clientIds.length === 0) return [];
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("bookings")
+        .select(`
+            id,
+            status,
+            client_id,
+            session_id,
+            sessions!inner (
+                id,
+                start_time,
+                end_time,
+                session_type,
+                status,
+                price,
+                trainer_id
+            )
+        `)
+        .in("client_id", clientIds)
+        .eq("sessions.trainer_id", trainerId)
+        .eq("status","paid")
+        .in("sessions.status", statuses)
+        .order("sessions(start_time)", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching sessions:", error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export async function getSessionById(sessionId: number) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("sessions")
+        .select("*")
+        .eq("id", sessionId)
+        .single();
+
+    if (error) {
+        console.error("Error fetching session:", error);
+        return null;
+    }
+
+    return data;
+}
+

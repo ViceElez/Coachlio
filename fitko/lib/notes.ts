@@ -86,3 +86,42 @@ export async function deleteNote(noteId: number) {
 
     return true;
 }
+
+export async function getClientNotes(trainerId: string, clientIds: string[]) {
+    if (clientIds.length === 0) return [];
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("trainer_notes")
+        .select("id, note, created_at, updated_at, client_id")
+        .eq("trainer_id", trainerId)
+        .in("client_id", clientIds)
+        .is("session_id", null);
+
+    if (error) {
+        console.error("Error fetching client notes:", error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export async function getSessionNotes(trainerId: string, sessionIds: number[]) {
+    if (sessionIds.length === 0) return [];
+
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("trainer_notes")
+        .select("id, note, created_at, updated_at, session_id")
+        .eq("trainer_id", trainerId)
+        .in("session_id", sessionIds);
+
+    if (error) {
+        console.error("Error fetching session notes:", error);
+        return [];
+    }
+
+    return data || [];
+}
