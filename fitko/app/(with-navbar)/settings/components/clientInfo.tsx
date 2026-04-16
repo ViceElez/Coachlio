@@ -151,7 +151,7 @@ export default function ClientInfo({
 								<div className="px-5 pb-5">
 									<div className="h-px bg-gray-100 mb-4" />
 
-										<div className="flex items-start justify-between gap-3 mb-4 min-w-0">
+										<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 min-w-0">
 											<div className="min-w-0 flex-1">
 												<p className="text-sm font-semibold text-gray-900">Client description</p>
 												<p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap wrap-anywhere">
@@ -159,11 +159,13 @@ export default function ClientInfo({
 											</p>
 										</div>
 
-										<DescriptionEditor
-											type="client"
-											entityId={c.id}
-											existingNote={c.clientNote ? { id: c.clientNote.id, note: c.clientNote.note } : null}
-										/>
+											<div className="self-start sm:self-auto">
+												<DescriptionEditor
+													type="client"
+													entityId={c.id}
+													existingNote={c.clientNote ? { id: c.clientNote.id, note: c.clientNote.note } : null}
+												/>
+											</div>
 									</div>
 
 									<div className="h-px bg-gray-100 mb-4" />
@@ -186,7 +188,7 @@ export default function ClientInfo({
 														key={s.booking_id}
 														className="p-4 rounded-xl border border-gray-100 bg-white"
 													>
-														<div className="flex items-start justify-between gap-4">
+																<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 															<div className="flex items-center gap-2 min-w-0">
 																<Dumbbell className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
 																<div className="min-w-0">
@@ -215,8 +217,8 @@ export default function ClientInfo({
 																</div>
 															</div>
 
-															<div className="flex flex-col items-end gap-2 shrink-0">
-																<div className="flex items-center gap-2">
+																<div className="flex flex-row flex-wrap items-center sm:flex-col sm:items-end gap-2 shrink-0">
+																	<div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
 																	<BookingStatusBadge status={s.booking_status} />
 																	<SessionStatusBadge status={s.status} />
 																</div>
@@ -224,21 +226,23 @@ export default function ClientInfo({
 															</div>
 														</div>
 
-																<div className="mt-3 flex items-start justify-between gap-3 min-w-0">
+																<div className="mt-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 min-w-0">
 																	<p className="text-sm text-gray-600 whitespace-pre-wrap wrap-anywhere min-w-0 flex-1">
 																<span className="font-medium text-gray-700">Description:</span> {descriptionText}
 															</p>
 
-															<DescriptionEditor
-																type="session"
-																entityId={s.session_id}
-																clientId={c.id}
-																existingNote={
-																	s.session_notes?.[0]
-																		? { id: s.session_notes[0].id, note: s.session_notes[0].note }
-																		: null
-																}
-															/>
+																	<div className="self-start sm:self-auto">
+																		<DescriptionEditor
+																			type="session"
+																			entityId={s.session_id}
+																			clientId={c.id}
+																			existingNote={
+																				s.session_notes?.[0]
+																					? { id: s.session_notes[0].id, note: s.session_notes[0].note }
+																					: null
+																			}
+																		/>
+																	</div>
 														</div>
 
 														{s.session_notes?.length > 1 && (

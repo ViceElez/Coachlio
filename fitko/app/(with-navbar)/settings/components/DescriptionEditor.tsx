@@ -27,7 +27,7 @@ export default function DescriptionEditor(props: DescriptionEditorProps) {
 	}
 
 	return (
-		<div className="flex items-center gap-2">
+		<div className="flex flex-wrap items-center gap-2">
 			{props.type === "client" ? (
 				<EditNote
 					type="client"
