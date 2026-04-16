@@ -10,6 +10,7 @@ import {
 	Dumbbell,
 	XCircle,
 } from "lucide-react";
+import DescriptionEditor from "./DescriptionEditor";
 
 function formatClientName(c: TrainerClient) {
 	return `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.email;
@@ -113,7 +114,8 @@ export default function ClientInfo({
 		id: c.id,
 		name: formatClientName(c),
 		email: c.email,
-		description: summarizeNotes(c),
+		clientNote: c.client_notes?.[0] ?? null,
+		descriptionSummary: summarizeNotes(c),
 		pastSessions: c.past_sessions ?? [],
 	}));
 
@@ -141,7 +143,7 @@ export default function ClientInfo({
 							>
 								<div className="min-w-0">
 									<p className="text-base font-semibold text-gray-900 truncate">{c.name}</p>
-									<p className="text-sm text-gray-600 mt-1">{c.description}</p>
+									<p className="text-sm text-gray-600 mt-1">{c.descriptionSummary}</p>
 									<p className="text-xs text-gray-500 mt-2">{c.email}</p>
 								</div>
 								<ChevronRight
@@ -154,6 +156,23 @@ export default function ClientInfo({
 							{isSelected && (
 								<div className="px-5 pb-5">
 									<div className="h-px bg-gray-100 mb-4" />
+
+									<div className="flex items-start justify-between gap-3 mb-4">
+										<div className="min-w-0">
+											<p className="text-sm font-semibold text-gray-900">Client description</p>
+											<p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+												{c.clientNote?.note?.trim() || "No description for this client yet."}
+											</p>
+										</div>
+
+										<DescriptionEditor
+											type="client"
+											entityId={c.id}
+											existingNote={c.clientNote ? { id: c.clientNote.id, note: c.clientNote.note } : null}
+										/>
+									</div>
+
+									<div className="h-px bg-gray-100 mb-4" />
 									<p className="text-sm font-semibold text-gray-900 mb-3">Previous sessions</p>
 									<div className="space-y-3">
 										{(c.pastSessions ?? []).length === 0 ? (
@@ -165,11 +184,14 @@ export default function ClientInfo({
 												const timeRange = formatTimeRange(s.start_time, s.end_time);
 												const duration = formatDurationMinutes(s.start_time, s.end_time);
 												const price = formatPriceEUR(s.price);
-															const notePreview = summarizeSessionNote(s.session_notes?.[0]?.note);
-															const descriptionText = notePreview ?? "No description for this session yet.";
+												const notePreview = summarizeSessionNote(s.session_notes?.[0]?.note);
+												const descriptionText = notePreview ?? "No description for this session yet.";
 
-															return (
-																<div key={s.booking_id} className="p-4 rounded-xl border border-gray-100 bg-white">
+												return (
+													<div
+														key={s.booking_id}
+														className="p-4 rounded-xl border border-gray-100 bg-white"
+													>
 														<div className="flex items-start justify-between gap-4">
 															<div className="flex items-center gap-2 min-w-0">
 																<Dumbbell className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -208,9 +230,22 @@ export default function ClientInfo({
 															</div>
 														</div>
 
-														{notePreview && (
-															<p className="text-sm text-gray-600 mt-3">{notePreview}</p>
-														)}
+														<div className="mt-3 flex items-start justify-between gap-3">
+															<p className="text-sm text-gray-600 whitespace-pre-wrap">
+																<span className="font-medium text-gray-700">Description:</span> {descriptionText}
+															</p>
+
+															<DescriptionEditor
+																type="session"
+																entityId={s.session_id}
+																clientId={c.id}
+																existingNote={
+																	s.session_notes?.[0]
+																		? { id: s.session_notes[0].id, note: s.session_notes[0].note }
+																		: null
+																}
+															/>
+														</div>
 
 														{s.session_notes?.length > 1 && (
 															<p className="text-xs text-gray-500 mt-2">

@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function addSessionNote(
     trainerId: string,
     clientId: string,
@@ -27,6 +28,7 @@ export async function addSessionNote(
     return data;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function addClientNote(
     trainerId: string,
     clientId: string,
@@ -53,15 +55,27 @@ export async function addClientNote(
     return data;
 }
 
-export async function updateNote(noteId: number, newNote: string) {
+export async function updateNote(noteId: number, newNote: string): Promise<any | null>;
+export async function updateNote(trainerId: string, noteId: number, newNote: string): Promise<any | null>;
+export async function updateNote(
+    a: string | number,
+    b: number | string,
+    c?: string
+) {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    const trainerId = typeof a === "string" ? a : null;
+    const noteId = typeof a === "number" ? a : (b as number);
+    const noteText = typeof a === "number" ? (b as string) : (c ?? "");
+
+    let q = supabase
         .from("trainer_notes")
-        .update({ note: newNote })
-        .eq("id", noteId)
-        .select()
-        .single();
+        .update({ note: noteText })
+        .eq("id", noteId);
+
+    if (trainerId) q = q.eq("trainer_id", trainerId);
+
+    const { data, error } = await q.select().single();
 
     if (error) {
         console.error('Error updating note:', error);
@@ -71,13 +85,22 @@ export async function updateNote(noteId: number, newNote: string) {
     return data;
 }
 
-export async function deleteNote(noteId: number) {
+export async function deleteNote(noteId: number): Promise<boolean>;
+export async function deleteNote(trainerId: string, noteId: number): Promise<boolean>;
+export async function deleteNote(a: string | number, b?: number) {
     const supabase = await createClient();
 
-    const { error } = await supabase
+    const trainerId = typeof a === "string" ? a : null;
+    const noteId = typeof a === "number" ? a : (b as number);
+
+    let q = supabase
         .from("trainer_notes")
         .delete()
         .eq("id", noteId);
+
+    if (trainerId) q = q.eq("trainer_id", trainerId);
+
+    const { error } = await q;
 
     if (error) {
         console.error('Error deleting note:', error);
@@ -97,7 +120,8 @@ export async function getClientNotes(trainerId: string, clientIds: string[]) {
         .select("id, note, created_at, updated_at, client_id")
         .eq("trainer_id", trainerId)
         .in("client_id", clientIds)
-        .is("session_id", null);
+        .is("session_id", null)
+        .order("updated_at", { ascending: false });
 
     if (error) {
         console.error("Error fetching client notes:", error);
@@ -116,7 +140,8 @@ export async function getSessionNotes(trainerId: string, sessionIds: number[]) {
         .from("trainer_notes")
         .select("id, note, created_at, updated_at, session_id")
         .eq("trainer_id", trainerId)
-        .in("session_id", sessionIds);
+        .in("session_id", sessionIds)
+        .order("updated_at", { ascending: false });
 
     if (error) {
         console.error("Error fetching session notes:", error);

@@ -364,20 +364,4 @@ export async function getClientSessions(
     return data || [];
 }
 
-export async function getSessionById(sessionId: number) {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
-        .from("sessions")
-        .select("*")
-        .eq("id", sessionId)
-        .single();
-
-    if (error) {
-        console.error("Error fetching session:", error);
-        return null;
-    }
-
-    return data;
-}
 
