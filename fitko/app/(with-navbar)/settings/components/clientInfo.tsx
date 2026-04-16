@@ -94,12 +94,6 @@ function SessionStatusBadge({ status }: { status: "scheduled" | "completed" }) {
 	return <span className={`${base} bg-indigo-50 text-indigo-700 border-indigo-200`}>Scheduled</span>;
 }
 
-function summarizeSessionNote(note?: string) {
-	if (!note) return null;
-	const trimmed = note.trim();
-	if (!trimmed) return null;
-	return trimmed.length > 160 ? `${trimmed.slice(0, 160)}…` : trimmed;
-}
 
 export default function ClientInfo({
 	clients,
@@ -143,7 +137,7 @@ export default function ClientInfo({
 							>
 								<div className="min-w-0">
 									<p className="text-base font-semibold text-gray-900 truncate">{c.name}</p>
-									<p className="text-sm text-gray-600 mt-1">{c.descriptionSummary}</p>
+																<p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap wrap-anywhere">{c.descriptionSummary}</p>
 									<p className="text-xs text-gray-500 mt-2">{c.email}</p>
 								</div>
 								<ChevronRight
@@ -157,10 +151,10 @@ export default function ClientInfo({
 								<div className="px-5 pb-5">
 									<div className="h-px bg-gray-100 mb-4" />
 
-									<div className="flex items-start justify-between gap-3 mb-4">
-										<div className="min-w-0">
-											<p className="text-sm font-semibold text-gray-900">Client description</p>
-											<p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+										<div className="flex items-start justify-between gap-3 mb-4 min-w-0">
+											<div className="min-w-0 flex-1">
+												<p className="text-sm font-semibold text-gray-900">Client description</p>
+												<p className="text-sm text-gray-600 mt-1 whitespace-pre-wrap wrap-anywhere">
 												{c.clientNote?.note?.trim() || "No description for this client yet."}
 											</p>
 										</div>
@@ -184,8 +178,8 @@ export default function ClientInfo({
 												const timeRange = formatTimeRange(s.start_time, s.end_time);
 												const duration = formatDurationMinutes(s.start_time, s.end_time);
 												const price = formatPriceEUR(s.price);
-												const notePreview = summarizeSessionNote(s.session_notes?.[0]?.note);
-												const descriptionText = notePreview ?? "No description for this session yet.";
+																	const rawNote = s.session_notes?.[0]?.note;
+																	const descriptionText = rawNote?.trim() || "No description for this session yet.";
 
 												return (
 													<div
@@ -230,8 +224,8 @@ export default function ClientInfo({
 															</div>
 														</div>
 
-														<div className="mt-3 flex items-start justify-between gap-3">
-															<p className="text-sm text-gray-600 whitespace-pre-wrap">
+																<div className="mt-3 flex items-start justify-between gap-3 min-w-0">
+																	<p className="text-sm text-gray-600 whitespace-pre-wrap wrap-anywhere min-w-0 flex-1">
 																<span className="font-medium text-gray-700">Description:</span> {descriptionText}
 															</p>
 

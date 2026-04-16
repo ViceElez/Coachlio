@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/server";
 import { addClientNote, addSessionNote, deleteNote, updateNote } from "@/lib/notes";
 import {routes} from "@/constants/routes";
 
+const MAX_DESCRIPTION_LENGTH = 1000;
+
 const updateNoteScoped = updateNote as unknown as (
 	trainerId: string,
 	noteId: number,
@@ -39,6 +41,9 @@ export async function upsertClientNoteAction(input: UpsertClientNoteInput) {
 
 	const trimmed = input.note.trim();
 	if (!trimmed) throw new Error("Description cannot be empty");
+	if (trimmed.length > MAX_DESCRIPTION_LENGTH) {
+		throw new Error(`Description is too long (max ${MAX_DESCRIPTION_LENGTH} characters)`);
+	}
 
 	if (input.noteId) {
 		const data = await updateNoteScoped(trainerId, input.noteId, trimmed);
@@ -59,6 +64,9 @@ export async function upsertSessionNoteAction(input: UpsertSessionNoteInput) {
 
 	const trimmed = input.note.trim();
 	if (!trimmed) throw new Error("Description cannot be empty");
+	if (trimmed.length > MAX_DESCRIPTION_LENGTH) {
+		throw new Error(`Description is too long (max ${MAX_DESCRIPTION_LENGTH} characters)`);
+	}
 
 	if (input.noteId) {
 		const data = await updateNoteScoped(trainerId, input.noteId, trimmed);

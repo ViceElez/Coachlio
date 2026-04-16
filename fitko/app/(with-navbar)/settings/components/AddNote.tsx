@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { upsertClientNoteAction, upsertSessionNoteAction } from "@/lib/trainerNotesActions";
 import { Loader2, Plus } from "lucide-react";
 
+const MAX_DESCRIPTION_LENGTH = 1000;
+const WARNING_THRESHOLD = 0.8; // 80%
+
 export type AddNoteProps =
 	| {
 			type: "client";
@@ -76,6 +79,11 @@ export default function AddNote(props: AddNoteProps) {
 		}
 	};
 
+	const used = draft.length;
+	const remaining = MAX_DESCRIPTION_LENGTH - used;
+	const ratio = used / MAX_DESCRIPTION_LENGTH;
+	const counterColor = ratio >= 1 ? "text-rose-600" : ratio >= WARNING_THRESHOLD ? "text-amber-600" : "text-gray-500";
+
 	return (
 		<>
 			<Button type="button" variant="outline" size="xs" onClick={() => setOpen(true)} disabled={isPending}>
@@ -106,9 +114,13 @@ export default function AddNote(props: AddNoteProps) {
 							value={draft}
 							onChange={(e) => setDraft(e.target.value)}
 							rows={5}
+							maxLength={MAX_DESCRIPTION_LENGTH}
 							className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-emerald-200"
 							placeholder={props.type === "client" ? "Add a note about this client…" : "Add a note about this session…"}
 						/>
+						<div className={`mt-2 text-xs text-right ${counterColor}`}>
+							{remaining} characters left
+						</div>
 					</div>
 
 					{error && (
@@ -137,4 +149,3 @@ export default function AddNote(props: AddNoteProps) {
 		</>
 	);
 }
-
