@@ -1,10 +1,17 @@
 "use client"
 
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { cancelBookingSession } from "@/lib/bookSession"
 import { routes } from "@/constants/routes"
+
+function formatMMSS(seconds: number) {
+    const clamped = Math.max(0, Math.floor(seconds))
+    const m = Math.floor(clamped / 60)
+    const s = clamped % 60
+    return `${m}:${String(s).padStart(2, "0")}`
+}
 
 const CheckoutPage = ({ amount, clientSecret,bookingId }: {
     amount: number
@@ -18,8 +25,40 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
     const [loading, setLoading] = useState(false)
     const [cancelling, setCancelling] = useState(false)
 
+    const hasExpiredRef = useRef(false)
+
+
+    const [secondsLeft, setSecondsLeft] = useState(5 * 60)
+
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            setSecondsLeft((s) => Math.max(0, s - 1))
+        }, 1000)
+        return () => window.clearInterval(id)
+    }, [])
+
+    useEffect(() => {
+        if (secondsLeft > 0 || hasExpiredRef.current) return
+
+        hasExpiredRef.current = true
+        setErrorMessage("Time ran out (5 minutes). Please try again.")
+
+        const t = window.setTimeout(() => {
+            router.push(`${routes.BOOK}?error=payment_timeout`)
+        }, 1800)
+
+        return () => window.clearTimeout(t)
+    }, [secondsLeft, router])
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+
+        if (secondsLeft <= 0) {
+            setErrorMessage("Time ran out (5 minutes). Please try again.")
+            router.push(`${routes.BOOK}?error=payment_timeout`)
+            return
+        }
+
         setLoading(true)
 
         if (!stripe || !elements) {
@@ -68,6 +107,10 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <p className="text-sm font-semibold text-gray-900">Time left</p>
+                <p className="text-sm text-gray-600 mt-1">{formatMMSS(secondsLeft)}</p>
+            </div>
             <PaymentElement />
             {errorMessage && (
                 <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
@@ -76,8 +119,8 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
             )}
             <button
                 type="submit"
-                disabled={!stripe || loading}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-xl"
+                disabled={!stripe || loading || secondsLeft <= 0}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 disabled:hover:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl"
             >
                 {loading ? "Processing..." : `Pay €${amount}`}
             </button>
