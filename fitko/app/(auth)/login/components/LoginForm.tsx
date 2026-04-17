@@ -31,9 +31,6 @@ export function LoginForm() {
                 setIsSubmitting(false);
                 return;
             }
-
-            // On success, `login()` typically redirects (NEXT_REDIRECT). If for some reason it
-            // doesn't, we re-enable the button to avoid a stuck loading state.
             setIsSubmitting(false);
         }catch (err) {
             const digest = (err as any)?.digest;
