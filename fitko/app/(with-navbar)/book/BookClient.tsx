@@ -6,7 +6,6 @@ import {
     Clock,
     Users,
     Calendar,
-    Search,
 } from "lucide-react";
 import { SessionProps } from "@/constants/interface/SessionProps";
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
@@ -18,25 +17,11 @@ const SORT_OPTIONS = ["Most Capacity", "Least Capacity", "Lowest Price", "Highes
 export default function BookClient({ availableSessions }: { profile: ClientProfile, availableSessions: SessionProps[] }) {
     const [typeFilter, setTypeFilter] = useState("All");
     const [sortOption, setSortOption] = useState("Most Capacity");
-    const [search, setSearch] = useState("");
     const [selectedSession, setSelectedSession] = useState<SessionProps | null>(null);
     const [openingSessionId, setOpeningSessionId] = useState<number | null>(null);
 
     const filtered = availableSessions
-        .filter((s) => {
-            const trainerName = s.trainer
-                ? `${s.trainer.first_name} ${s.trainer.last_name}`
-                : "";
-
-            const matchesType =
-                typeFilter === "All" || s.session_type === typeFilter;
-
-            const matchesSearch =
-                search === "" ||
-                trainerName.toLowerCase().includes(search.toLowerCase());
-
-            return matchesType && matchesSearch;
-        })
+        .filter((s) => typeFilter === "All" || s.session_type === typeFilter)
         .sort((a, b) => {
             if (sortOption === "Most Capacity") return b.capacity_available - a.capacity_available;
             if (sortOption === "Least Capacity") return a.capacity_available - b.capacity_available;
@@ -61,16 +46,6 @@ export default function BookClient({ availableSessions }: { profile: ClientProfi
                 <p className="text-gray-500 text-sm sm:text-base mt-1 mb-4 sm:mb-6">Find the perfect training session that fits your schedule</p>
 
                 <div className="bg-white border border-gray-200 rounded-2xl px-4 sm:px-6 py-4 sm:py-5 mb-6 sm:mb-8">
-                    <div className="relative mb-4">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search trainers or session types..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                        />
-                    </div>
                     <div className="flex gap-2 flex-wrap">
                         {SESSION_TYPE_FILTERS.map((f) => (
                             <button

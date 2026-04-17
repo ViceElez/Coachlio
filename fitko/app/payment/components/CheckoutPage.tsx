@@ -28,7 +28,7 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
     const hasExpiredRef = useRef(false)
 
 
-    const [secondsLeft, setSecondsLeft] = useState(5 * 60)
+    const [secondsLeft, setSecondsLeft] = useState(7 * 60)
 
     useEffect(() => {
         const id = window.setInterval(() => {
@@ -41,7 +41,7 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
         if (secondsLeft > 0 || hasExpiredRef.current) return
 
         hasExpiredRef.current = true
-        setErrorMessage("Time ran out (5 minutes). Please try again.")
+        setErrorMessage("Time ran out (7 minutes). Please try again.")
 
         const t = window.setTimeout(() => {
             router.push(`${routes.BOOK}?error=payment_timeout`)
@@ -54,7 +54,7 @@ const CheckoutPage = ({ amount, clientSecret,bookingId }: {
         event.preventDefault()
 
         if (secondsLeft <= 0) {
-            setErrorMessage("Time ran out (5 minutes). Please try again.")
+            setErrorMessage("Time ran out (7 minutes). Please try again.")
             router.push(`${routes.BOOK}?error=payment_timeout`)
             return
         }

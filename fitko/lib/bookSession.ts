@@ -35,6 +35,7 @@ export async function reserveSession(sessionId: number) {
         const { data: booking, error: rpcError } = await supabase.rpc("reserve_session", {
             p_session_id: sessionId,
             p_payment_intent_id: null,
+            p_credit_amount: creditsToApply,
         })
 
         if (rpcError) throw new Error(rpcError.message)
@@ -60,6 +61,7 @@ export async function reserveSession(sessionId: number) {
     const { data: booking, error: rpcError } = await supabase.rpc("reserve_session", {
         p_session_id: sessionId,
         p_payment_intent_id: paymentIntent.id,
+        p_credit_amount: creditsToApply,
     })
 
     if (rpcError) {
@@ -147,7 +149,7 @@ export async function cancelBookingSession(bookingId: number) {
 
     const { data: booking, error: fetchError } = await supabase
         .from("bookings")
-        .select("id, stripe_payment_intent_id, status")
+        .select("id, stripe_payment_intent_id, status, credit_amount")
         .eq("id", bookingId)
         .single()
 
@@ -156,14 +158,6 @@ export async function cancelBookingSession(bookingId: number) {
     if (booking.status === "expired") throw new Error("This booking has already expired.")
     if (booking.status === "paid") throw new Error("Cannot cancel a booking that has already been paid.")
 
-    const { data: creditTx } = await supabase
-        .from("credit_transactions")
-        .select("amount")
-        .eq("booking_id", bookingId)
-        .eq("type", "purchase")
-        .single()
-
-    const creditsToRestore = creditTx ? Math.abs(creditTx.amount) : 0
 
     if (booking.stripe_payment_intent_id) {
         try {
@@ -182,7 +176,7 @@ export async function cancelBookingSession(bookingId: number) {
     const { error: rpcError } = await supabase.rpc("cancel_booking_and_credit", {
         p_booking_id: bookingId,
         p_user_id: user.id,
-        p_amount: creditsToRestore,
+        p_amount: booking.credit_amount ? Math.abs(booking.credit_amount) : 0,
     })
 
     if (rpcError) throw new Error(rpcError.message)
