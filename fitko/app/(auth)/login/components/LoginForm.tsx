@@ -18,25 +18,28 @@ import {routes} from "@/constants/routes";
 
 export function LoginForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleSubmit(formData: FormData) {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         setErrors({});
         try {
             const result = await login(formData);
             if (result?.errors) {
                 setErrors(result.errors);
+                setIsSubmitting(false);
+                return;
             }
+
+            // On success, `login()` typically redirects (NEXT_REDIRECT). If for some reason it
+            // doesn't, we re-enable the button to avoid a stuck loading state.
+            setIsSubmitting(false);
         }catch (err) {
-            if (
-                typeof err === "object" &&
-                err !== null &&
-                "digest" in err &&
-                typeof (err as { digest: string }).digest === "string" &&
-                (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
-            ) {
-                throw err;
-            }
+            const digest = (err as any)?.digest;
+            if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw err;
             setErrors({ general: "An unexpected error occurred. Please try again." });
+            setIsSubmitting(false);
         }
     }
 
@@ -79,8 +82,8 @@ export function LoginForm() {
                                 <p className="text-red-500 text-sm">{errors.password}</p>
                             )}
                         </div>
-                        <Button type="submit" className="w-full">
-                            Login
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? "Logging in..." : "Login"}
                         </Button>
                     </div>
                 </form>

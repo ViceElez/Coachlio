@@ -11,13 +11,25 @@ export async function handleFailedPayment(paymentIntentId: string) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    const { error } = await supabase
+    const { data: booking, error: fetchError } = await supabase
         .from("bookings")
-        .update({ status: "cancelled" })
+        .select("id, client_id, credit_amount")
         .eq("stripe_payment_intent_id", paymentIntentId)
         .eq("status", "reserved")
+        .single()
 
-    if (error) throw new Error("Unable to update booking status.")
+    if (fetchError || !booking) return
+
+    const { error } = await supabase.rpc("cancel_booking_and_credit", {
+        p_booking_id: booking.id,
+        p_user_id:    booking.client_id,
+        p_amount:     booking.credit_amount,
+    })
+
+    if (error) {
+        if (error.message.includes("one_refund_per_booking")) return
+        throw new Error(`Failed to cancel and refund: ${error.message}`)
+    }
 }
 
 export async function updateBookingStatus(intentId: string) {
