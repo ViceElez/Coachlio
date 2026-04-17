@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -15,6 +16,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signup } from "@/lib/auth-actions";
 import { routes } from "@/constants/routes";
+
+function SignUpSubmitButton() {
+    const { pending } = useFormStatus();
+
+    return (
+        <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Creating account..." : "Create an account"}
+        </Button>
+    );
+}
 
 export function SignUpForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -143,9 +154,7 @@ export function SignUpForm() {
                                 <p className="text-red-500 text-sm">{errors.password}</p>
                             )}
                         </div>
-                        <Button type="submit" className="w-full">
-                            Create an account
-                        </Button>
+                        <SignUpSubmitButton />
                     </div>
                 </form>
                 <div className="mt-4 text-center text-sm">
