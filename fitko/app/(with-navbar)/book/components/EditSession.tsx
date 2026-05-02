@@ -13,7 +13,7 @@ import {
 	X,
 } from "lucide-react";
 import { SessionProps } from "@/constants/interface/SessionProps";
-import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
+import { formatDate, formatTime, getDuration, localDatetimeToISOString } from "@/lib/helper/getTime";
 import {editSession} from "@/lib/session";
 
 const SESSION_TYPES = ["1on1", "group"] as const;
@@ -87,7 +87,9 @@ export default function EditSession({
 		setError(null);
 
 		try {
-			await editSession(session.id,profileId,startTime,endTime,sessionType,price,capacity)
+			const startIso = localDatetimeToISOString(startTime);
+			const endIso = localDatetimeToISOString(endTime);
+			await editSession(session.id, profileId, startIso, endIso, sessionType, price, capacity);
 			setSubmitted(true);
 		} catch {
 			setError("Something went wrong. Please try again.");
