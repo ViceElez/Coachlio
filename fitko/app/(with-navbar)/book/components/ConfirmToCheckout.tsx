@@ -3,17 +3,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import {X, Calendar, Clock, Timer, Users, DollarSign, User, AlertCircle, Loader2, CheckCircle2} from "lucide-react";
+import {X, Calendar, Clock, Timer, Users, DollarSign, User, AlertCircle, Loader2, CheckCircle2, CreditCard, Banknote} from "lucide-react";
 import { formatDate, formatTime, getDuration } from "@/lib/helper/getTime";
 import { ConfirmToCheckoutProps } from "@/constants/interface/ConfirmToCheckoutProps";
 import { routes } from "@/constants/routes";
 import {reserveSession} from "@/lib/bookSession";
+
+type PaymentMethod = "card" | "cash";
 
 export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => {
@@ -46,23 +50,35 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
             ? "bg-emerald-100 text-emerald-700"
             : "bg-gray-100 text-gray-700";
 
+    const handleConfirmCard = async () => {
+        const booking = await reserveSession(session.id)
+
+        if (booking.fullyPaidWithCredits) {
+            setSuccess("Booking confirmed — paid fully with credits.")
+            await new Promise((r) => setTimeout(r, 1500))
+            onClose()
+            router.refresh()
+            return
+        }
+
+        router.push(`${routes.CHECKOUT}/${booking.id}`)
+    }
+
+    const handleConfirmCash = async () => {
+        // TODO: implement cash payment logic
+    }
+
     const handleConfirm = async () => {
         if (loading) return
         setLoading(true)
         setError(null)
         setSuccess(null)
         try {
-            const booking = await reserveSession(session.id)
-
-            if (booking.fullyPaidWithCredits) {
-                setSuccess("Booking confirmed — paid fully with credits.")
-                await new Promise((r) => setTimeout(r, 1500))
-                onClose()
-                router.refresh()
-                return
+            if (paymentMethod === "card") {
+                await handleConfirmCard()
+            } else {
+                await handleConfirmCash()
             }
-
-            router.push(`${routes.CHECKOUT}/${booking.id}`)
         } catch (e: any) {
             console.error(e)
             setError(e?.message ?? "Unable to continue to checkout. Please try again.")
@@ -169,6 +185,40 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                         </div>
                         <span className="text-2xl font-bold text-emerald-500">${session.price}</span>
                     </div>
+
+                    <div className="border-t border-gray-100" />
+
+                    <div>
+                        <p className="text-xs text-gray-400 mb-2">Payment method</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod("card")}
+                                disabled={loading}
+                                className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                                    paymentMethod === "card"
+                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                                }`}
+                            >
+                                <CreditCard className="w-4 h-4" />
+                                Card
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod("cash")}
+                                disabled={loading}
+                                className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                                    paymentMethod === "cash"
+                                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                                }`}
+                            >
+                                <Banknote className="w-4 h-4" />
+                                Cash
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="px-4 sm:px-6 pb-4 sm:pb-6 shrink-0 border-t border-gray-100 pt-4">
@@ -179,33 +229,33 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
                                 By confirming, you acknowledge this booking is <span className="font-semibold">non-refundable</span>. If you
                                 cancel later, you will <span className="font-semibold">not receive a refund</span> and will be issued
                                 <span className="font-semibold"> Fitko credits</span> instead. You <span className="font-semibold">cannot cancel </span>
-                                 within <span className="font-semibold">12 hours</span> of the session start time.
+                                within <span className="font-semibold">12 hours</span> of the session start time.
                             </p>
                         </div>
                     </div>
 
                     <div className="flex gap-3">
-                    <button
-                        onClick={onClose}
-                        disabled={loading}
-                        className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={() => {handleConfirm()}}
-                        disabled={loading}
-                        className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-                    >
-                        {loading ? (
-                            <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Checking…
-                            </>
-                        ) : (
-                            "Confirm Booking"
-                        )}
-                    </button>
+                        <button
+                            onClick={onClose}
+                            disabled={loading}
+                            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={() => {handleConfirm()}}
+                            disabled={loading}
+                            className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Checking…
+                                </>
+                            ) : (
+                                "Confirm Booking"
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
