@@ -65,7 +65,14 @@ export const ConfirmToCheckout = ({ session, onClose }: ConfirmToCheckoutProps) 
     }
 
     const handleConfirmCash = async () => {
-        // TODO: implement cash payment logic
+        const booking = await reserveSession(session.id,'cash')
+        if (booking.paidWithCash) {
+            setSuccess("Booking confirmed — payment with cash.")
+            await new Promise((r) => setTimeout(r, 1500))
+            onClose()
+            router.refresh()
+            return
+        }
     }
 
     const handleConfirm = async () => {

@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
 })
 
-export async function reserveSession(sessionId: number) {
+export async function reserveSession(sessionId: number, paymentMethod: "card" | "cash" = "card") {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -27,11 +27,13 @@ export async function reserveSession(sessionId: number) {
     }
 
     const priceInCents = convertToSubcurrency(session.price)
+    const isCash = paymentMethod === "cash"
+
     const credits = userPrivate?.credits ?? 0
-    const creditsToApply = Math.min(credits, priceInCents)
+    const creditsToApply = isCash ? 0 : Math.min(credits, priceInCents)
     const stripeAmount = priceInCents - creditsToApply
 
-    if (stripeAmount === 0) {
+    if (isCash || stripeAmount === 0) {
         const { data: booking, error: rpcError } = await supabase.rpc("reserve_session", {
             p_session_id: sessionId,
             p_payment_intent_id: null,
@@ -40,15 +42,26 @@ export async function reserveSession(sessionId: number) {
 
         if (rpcError) throw new Error(rpcError.message)
 
-        await supabase.rpc("deduct_credits", {
-            p_user_id: user.id,
-            p_amount: creditsToApply,
-            p_booking_id: booking.id,
-        })
+        if (creditsToApply > 0) {
+            const { error: creditError } = await supabase.rpc("deduct_credits", {
+                p_user_id: user.id,
+                p_amount: creditsToApply,
+                p_booking_id: booking.id,
+            })
 
-        await supabase.from("bookings").update({ status: "paid" }).eq("id", booking.id)
+            if (creditError) throw new Error(creditError.message)
+        }
 
-        return { ...booking, clientSecret: null, fullyPaidWithCredits: true, creditsApplied: creditsToApply }
+        const status = isCash ? "pending_cash" : "paid"
+        await supabase.from("bookings").update({ status }).eq("id", booking.id)
+
+        return {
+            ...booking,
+            clientSecret: null,
+            fullyPaidWithCredits: !isCash,
+            paidWithCash: isCash,
+            creditsApplied: creditsToApply,
+        }
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
