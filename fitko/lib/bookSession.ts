@@ -160,6 +160,7 @@ export async function cancelBookingSession(bookingId: number) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
+
     const { data: booking, error: fetchError } = await supabase
         .from("bookings")
         .select("id, stripe_payment_intent_id, status, credit_amount")
@@ -211,6 +212,7 @@ export async function handleStripeCancellation(bookingId: number) {
     if (bookingError || !booking) return { error: "Booking not found" };
     if (booking.status === "cancelled") return { error: "Already cancelled" };
 
+    const isCash = booking.status === "pending_cash";
     const sessionRow = Array.isArray(booking.sessions) ? booking.sessions[0] : booking.sessions;
     const price = sessionRow?.price;
 
@@ -235,7 +237,7 @@ export async function handleStripeCancellation(bookingId: number) {
     const { error: rpcError } = await supabase.rpc("cancel_booking_and_credit", {
         p_booking_id: bookingId,
         p_user_id: user.id,
-        p_amount: convertToSubcurrency(price),
+        p_amount: isCash ? 0 : convertToSubcurrency(price),
     });
 
     if (rpcError) return { error: rpcError.message };

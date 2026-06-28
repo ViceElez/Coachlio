@@ -64,7 +64,7 @@ export default function CancelSessionModal({
 			<div className="p-6 sm:p-7 bg-white">
 				<h3 className="text-lg sm:text-xl font-bold text-gray-900">Cancel session?</h3>
 				<p className="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
-					Are you sure you want to cancel this session? If you cancel, the money from the cancellation will be
+					Are you sure you want to cancel this session? If you cancel a card paid session, the money from the cancellation will be
 					reverted to your credits.
 				</p>
 
